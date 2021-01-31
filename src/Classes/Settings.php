@@ -52,10 +52,13 @@ class Settings {
 		$value         = isset( $args['value'] ) ? ' value="' . $args['value'] . '"' : '';
 		$name          = isset( $args['name'] ) ? ' name="' . $args['name'] . '" ' : '';
 		$type          = isset( $args['type'] ) ? $args['type'] : 'text';
+		$step          = isset( $args['step'] ) ? ' step="' . $args['step'] . '" ' : '';
+		$max           = isset( $args['max'] ) ? ' max="' . $args['max'] . '" ' : '';
+		$min           = isset( $args['min'] ) ? ' min="' . $args['min'] . '" ' : '';
 		$id            = isset( $args['id'] ) ? ' id="' . $args['id'] . '" ' : '';
 
 		?>
-		<input type="<?php echo $type; ?>" <?php echo wp_kses( $classes . $name . $id . $classes . $value . $required, wp_kses_allowed_html( 'data' ) ); ?>>
+		<input type="<?php echo $type; ?>" <?php echo wp_kses( $classes . $name . $max . $min . $step . $id . $classes . $value . $required, wp_kses_allowed_html( 'data' ) ); ?>>
 		<div <?php echo wp_kses( $label_classes, wp_kses_allowed_html( 'data' ) ); ?>><?php echo wp_kses( $label_text, wp_kses_allowed_html( 'data' ) ); ?></div>
 		<?php
 

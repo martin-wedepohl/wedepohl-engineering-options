@@ -5,3 +5,10 @@ input#start:not(:valid) {
 .width-100 {
 	width: 100%;
 }
+
+.input-label {
+	margin-bottom: 1em;
+	font-weight: 700;
+	font-size: .7rem;
+	text-transform: uppercase;
+}

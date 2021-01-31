@@ -1,11 +1,11 @@
 <?php
 /**
- * Jobs custom post type
+ * Education custom post type
  *
  * PHP Version 7
  *
  * @category WEOP
- * @package  Jobs
+ * @package  Education
  * @author   Martin Wedepohl <martin@wedepohlengineering.com>
  * @license  GPL3 or later
  */
@@ -19,28 +19,29 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 defined( 'ABSPATH' ) || die( '' );
 
-if ( ! class_exists( 'Jobs' ) ) {
+if ( ! class_exists( 'Education' ) ) {
 
 	/**
-	 * Jobs custom post type
+	 * Education custom post type
 	 */
-	class Jobs {
+	class Education {
 
-		const MAX_DATE       = '9999-12-31';
-		const POST_TYPE      = 'jobs';
-		const META_BOX_DATA  = 'weop_jobs_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_jobs_meta_box_nonce';
+		const POST_TYPE      = 'education';
+		const META_BOX_DATA  = 'weop_education_save_meta_box_data';
+		const META_BOX_NONCE = 'weo_education_meta_box_nonce';
+
+		private $max_year = 0;
 
 		/**
 		 * Return the meta key
 		 */
 		public static function get_meta_key() {
 			return array(
-				'start'       => '_meta_jobs_start',
-				'end'         => '_meta_jobs_end',
-				'company'     => '_meta_jobs_company',
-				'company_url' => '_meta_jobs_company_url',
-				'location'    => '_meta_jobs_location',
+				'year'        => '_meta_education_year',
+				'course'      => '_meta_education_couse',
+				'course_url'  => '_meta_education_course_url',
+				'institution' => '_meta_education_institution',
+				'seminar'     => '_meta_education_seminar',
 			);
 		}
 
@@ -64,18 +65,18 @@ if ( ! class_exists( 'Jobs' ) ) {
 
 			$meta_key_array = self::get_meta_key();
 
-			$start       = get_post_meta( $post_id, $meta_key_array['start'], true );
-			$end         = get_post_meta( $post_id, $meta_key_array['end'], true );
-			$company     = get_post_meta( $post_id, $meta_key_array['company'], true );
-			$company_url = get_post_meta( $post_id, $meta_key_array['company_url'], true );
-			$location    = get_post_meta( $post_id, $meta_key_array['location'], true );
+			$year        = get_post_meta( $post_id, $meta_key_array['year'], true );
+			$course      = get_post_meta( $post_id, $meta_key_array['course'], true );
+			$course_url  = get_post_meta( $post_id, $meta_key_array['course_url'], true );
+			$institution = get_post_meta( $post_id, $meta_key_array['institution'], true );
+			$seminar     = get_post_meta( $post_id, $meta_key_array['seminar'], true );
 
 			$data = array(
-				'start'       => sanitize_text_field( $start ),
-				'end'         => sanitize_text_field( $end ),
-				'company'     => sanitize_text_field( $company ),
-				'company_url' => esc_url( $company_url ),
-				'location'    => sanitize_text_field( $location ),
+				'year'        => sanitize_text_field( $year ),
+				'course'      => sanitize_text_field( $course ),
+				'course_url'  => esc_url( $course_url ),
+				'institution' => sanitize_text_field( $institution ),
+				'seminar'     => sanitize_text_field( $seminar ),
 			);
 
 			return $data;
@@ -85,6 +86,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 * Class constructor
 		 */
 		public function __construct() {
+			$this->max_year = date('Y');
 			add_action( 'init', array( $this, 'register' ) );
 			add_action( 'save_post', array( $this, 'save_meta' ), 1, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_columns', array( $this, 'table_head' ) );
@@ -98,26 +100,26 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 */
 		public function register() {
 			$labels = array(
-				'name'               => __( 'Jobs', 'weop' ),
-				'singular_name'      => __( 'Job', 'weop' ),
-				'menu_name'          => __( 'Jobs', 'weop' ),
-				'parent_item_colon'  => __( 'Parent Job', 'weop' ),
-				'all_items'          => __( 'All Jobs', 'weop' ),
-				'view_item'          => __( 'View Job', 'weop' ),
-				'add_new_item'       => __( 'Add New Job', 'weop' ),
+				'name'               => __( 'Education', 'weop' ),
+				'singular_name'      => __( 'Education', 'weop' ),
+				'menu_name'          => __( 'Education', 'weop' ),
+				'parent_item_colon'  => __( 'Parent Education', 'weop' ),
+				'all_items'          => __( 'All Education', 'weop' ),
+				'view_item'          => __( 'View Education', 'weop' ),
+				'add_new_item'       => __( 'Add New Education', 'weop' ),
 				'add_new'            => __( 'Add New', 'weop' ),
-				'edit_item'          => __( 'Edit Job', 'weop' ),
-				'update_item'        => __( 'Update Job', 'weop' ),
-				'search_items'       => __( 'Search Jobs', 'weop' ),
-				'not_found'          => __( 'Job Not Found', 'weop' ),
-				'not_found_in_trash' => __( 'Job Not Found in Trash', 'weop' ),
+				'edit_item'          => __( 'Edit Education', 'weop' ),
+				'update_item'        => __( 'Update Education', 'weop' ),
+				'search_items'       => __( 'Search Education', 'weop' ),
+				'not_found'          => __( 'Education Not Found', 'weop' ),
+				'not_found_in_trash' => __( 'Education Not Found in Trash', 'weop' ),
 			);
 
 			$args = array(
-				'label'                => __( 'jobs', 'weop' ),
-				'description'          => __( 'Jobs', 'weop' ),
+				'label'                => __( 'education', 'weop' ),
+				'description'          => __( 'Education', 'weop' ),
 				'labels'               => $labels,
-				'supports'             => array( 'title', 'editor' ),
+				'supports'             => array( 'title' ),
 				'hierarchical'         => false,
 				'public'               => true,
 				'show_ui'              => true,
@@ -145,7 +147,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 		public function register_meta_box() {
 			add_meta_box(
 				'information_section',
-				__( 'Job Information', 'weop' ),
+				__( 'Education Information', 'weop' ),
 				array( $this, 'meta_box' ),
 				self::POST_TYPE,
 				'side',
@@ -170,58 +172,47 @@ if ( ! class_exists( 'Jobs' ) ) {
 
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'Start Date', 'weop' ),
-				'required'      => true,
+				'label-text'    => __( 'Course URL', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['start'] ) ? $data['start'] : '',
-				'name'          => 'start',
-				'type'          => 'date',
-				'id'            => 'start',
-			);
-			$settings->display_text_field( $args );
-
-			// Check if large date in the future and change it to no date
-			$end = isset( $data['end'] ) ? self::MAX_DATE === $data['end'] ? '' : $data['end'] : '';
-			$args = array(
-				'label-classes' => 'input-label',
-				'label-text'    => __( 'End Date', 'weop' ),
-				'classes'       => 'width-100',
-				'value'         => $end,
-				'name'          => 'end',
-				'type'          => 'date',
-				'id'            => 'end',
+				'value'         => isset( $data['course_url'] ) ? $data['course_url'] : '',
+				'name'          => 'course_url',
+				'id'            => 'course_url',
 			);
 			$settings->display_text_field( $args );
 
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'Company', 'weop' ),
+				'label-text'    => __( 'Institution', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['company'] ) ? $data['company'] : '',
-				'name'          => 'company',
-				'id'            => 'company',
+				'value'         => isset( $data['institution'] ) ? $data['institution'] : '',
+				'name'          => 'institution',
+				'id'            => 'institution',
 			);
 			$settings->display_text_field( $args );
 
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'Company URL', 'weop' ),
+				'label-text'    => __( 'Year', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['company_url'] ) ? $data['company_url'] : '',
-				'name'          => 'company_url',
-				'id'            => 'company_url',
+				'value'         => $data['year'],
+				'name'          => 'year',
+				'type'          => 'number',
+				'min'           => 1985,
+				'max'           => $this->max_year,
+				'step'          => 1,
+				'id'            => 'year',
 			);
 			$settings->display_text_field( $args );
 
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'Location', 'weop' ),
+				'label-text'    => __( 'Seminar?', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['location'] ) ? $data['location'] : '',
-				'name'          => 'location',
-				'id'            => 'location',
+				'value'         => $data['seminar'],
+				'name'          => 'seminar',
+				'id'            => 'seminar',
 			);
-			$settings->display_text_field( $args );
+			$settings->display_checkbox_field( $args );
 
 		}
 
@@ -245,20 +236,14 @@ if ( ! class_exists( 'Jobs' ) ) {
 			}
 			// Now that we're authenticated, time to save the data.
 			$meta_key_array = self::get_meta_key();
-			$data = sanitize_text_field( $_POST['start'] );
-			update_post_meta( $post_id, $meta_key_array['start'], $data );
-			$data = sanitize_text_field( $_POST['end'] );
-			if ('' === $data) {
-				// No end dat set to large date in the future
-				$data = self::MAX_DATE;
-			}
-			update_post_meta( $post_id, $meta_key_array['start'], $data );
-			$data = sanitize_text_field( $_POST['company'] );
-			update_post_meta( $post_id, $meta_key_array['company'], $data );
-			$data = esc_url_raw( $_POST['company_url'], array( 'http', 'https' ) );
-			update_post_meta( $post_id, $meta_key_array['company_url'], $data );
-			$data = sanitize_text_field( $_POST['location'] );
-			update_post_meta( $post_id, $meta_key_array['location'], $data );
+			$data = sanitize_text_field( $_POST['year'] );
+			update_post_meta( $post_id, $meta_key_array['year'], $data );
+			$data = esc_url_raw( $_POST['course_url'], array( 'http', 'https' ) );
+			update_post_meta( $post_id, $meta_key_array['course_url'], $data );
+			$data = sanitize_text_field( $_POST['institution'] );
+			update_post_meta( $post_id, $meta_key_array['institution'], $data );
+			$data = sanitize_text_field( $_POST['seminar'] );
+			update_post_meta( $post_id, $meta_key_array['seminar'], $data );
 		}
 
 		/**
@@ -273,13 +258,13 @@ if ( ! class_exists( 'Jobs' ) ) {
 			// Want the selection box and title (name for our custom post type) first.
 			$newcols['cb'] = $columns['cb'];
 			unset( $columns['cb'] );
-			$newcols['title'] = 'Name';
+			$newcols['title'] = __( 'Course', 'weop' );
 			unset( $columns['title'] );
 			// Our custom meta data columns.
-			$newcols['start']    = __( 'Start Date', 'weop' );
-			$newcols['end']      = __( 'End Date', 'weop' );
-			$newcols['company']  = __( 'Company', 'weop' );
-			$newcols['location'] = __( 'Location', 'weop' );
+			$newcols['course_url']  = __( 'Course URL', 'weop' );
+			$newcols['institution'] = __( 'Institution', 'weop' );
+			$newcols['year']        = __( 'Year', 'weop' );
+			$newcols['seminar']     = __( 'Is Seminar', 'weop' );
 			// Want date last.
 			unset( $columns['date'] );
 			// Add all other selected columns.
@@ -300,22 +285,20 @@ if ( ! class_exists( 'Jobs' ) ) {
 		public function table_content( $column_name, $post_id ) {
 			$data = self::get_data( $post_id );
 
-			if ( 'start' === $column_name ) {
-				echo esc_attr( $data['start'] );
-			} elseif ( 'end' === $column_name ) {
-				// MAX_DATE is a large date in the future representing being presently at the job
-				echo ( self::MAX_DATE === $data['end'] ) ? 'Present' : esc_attr( $data['end'] );
-			} elseif ( 'company' === $column_name ) {
-				if ( isset( $data['company_url'] ) ) {
-					echo '<a href="' . esc_url( $data['company_url'] ) .
-					'" target="_blank" title="Go To ' .
-					esc_attr( $data['company'] ) . '">' .
-					esc_attr( $data['company'] ) . '</a>';
-				} else {
-					echo esc_attr( $data['company'] );
+			if ( 'year' === $column_name ) {
+				echo esc_attr( $data['year'] );
+			} elseif ( 'course_url' === $column_name ) {
+				if ( isset( $data['course_url'] ) ) {
+					echo '<a href="' . esc_url( $data['course_url'] ) .
+					'" target="_blank" title="Go To Course">' .
+					esc_url( $data['course_url'] ) . '</a>';
 				}
-			} elseif ( 'location' === $column_name ) {
-				echo esc_attr( $data['location'] );
+			} elseif ( 'institution' === $column_name ) {
+				echo esc_attr( $data['institution'] );
+			} elseif ( 'seminar' === $column_name ) {
+				if ( '1' === $data['seminar'] ) {
+					echo 'YES';
+				}
 			}
 		}
 
@@ -323,10 +306,8 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 * Sort the custom post type by meta data
 		 */
 		public function table_sort( $columns ) {
-			$columns['start'] = 'start';
-			$columns['end'] = 'end';
-			$columns['company'] = 'company';
-			$columns['location'] = 'location';
+			$columns['year'] = 'year';
+			$columns['institution'] = 'institution';
 
 			return $columns;
 		}
@@ -344,14 +325,11 @@ if ( ! class_exists( 'Jobs' ) ) {
 			$orderby = $query->get( 'orderby');
 
 			switch( $orderby ) {
-				case 'start':
-				case 'end':
+				case 'year':
 					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
-					$query->set( 'meta_type', 'DATE' );
-					$query->set( 'orderby', 'meta_value' );
+					$query->set( 'orderby', 'meta_value_num' );
 					break;
-				case 'company':
-				case 'location':
+				case 'institution':
 					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
 					$query->set( 'orderby', 'meta_value' );
 				break;
