@@ -27,8 +27,8 @@ if ( ! class_exists( 'Jobs' ) ) {
 	 */
 	class Jobs {
 
+		const MAX_DATE       = '9999-12-31';
 		const POST_TYPE      = 'jobs';
-		const META_DATA_KEY  = '_meta_jobs_data';
 		const META_BOX_DATA  = 'weop_jobs_save_meta_box_data';
 		const META_BOX_NONCE = 'weo_jobs_meta_box_nonce';
 
@@ -36,7 +36,13 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 * Return the meta key
 		 */
 		public static function get_meta_key() {
-			return self::META_DATA_KEY;
+			return array(
+				'start'       => '_meta_jobs_start',
+				'end'         => '_meta_jobs_end',
+				'company'     => '_meta_jobs_company',
+				'company_url' => '_meta_jobs_company_url',
+				'location'    => '_meta_jobs_location',
+			);
 		}
 
 		/**
@@ -56,17 +62,20 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 * @return array Associative array with all the meta data
 		 */
 		public static function get_data( $post_id ) {
-			$key  = self::META_DATA_KEY;
-			$data = get_post_meta( $post_id, $key );
-			if ( count( $data ) > 0 ) {
-				$data = $data[0];
-			} else {
-				$data = array();
-			}
-			$data['start']    = isset( $data['start'] ) ? sanitize_text_field( $data['start'] ) : '';
-			$data['end']      = isset( $data['end'] ) ? sanitize_text_field( $data['end'] ) : '';
-			$data['company']  = isset( $data['company'] ) ? sanitize_text_field( $data['company'] ) : '';
-			$data['location'] = isset( $data['location'] ) ? sanitize_text_field( $data['location'] ) : '';
+
+			$start       = get_post_meta( $post_id, '_meta_jobs_start', true );
+			$end         = get_post_meta( $post_id, '_meta_jobs_end', true );
+			$company     = get_post_meta( $post_id, '_meta_jobs_company', true );
+			$company_url = get_post_meta( $post_id, '_meta_jobs_company_url', true );
+			$location    = get_post_meta( $post_id, '_meta_jobs_location', true );
+
+			$data = array(
+				'start'       => sanitize_text_field( $start ),
+				'end'         => sanitize_text_field( $end ),
+				'company'     => sanitize_text_field( $company ),
+				'company_url' => esc_url( $company_url ),
+				'location'    => sanitize_text_field( $location ),
+			);
 
 			return $data;
 		}
@@ -80,6 +89,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_columns', array( $this, 'table_head' ) );
 			add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_sortable_columns', array( $this, 'table_sort' ) );
+			add_action( 'pre_get_posts', array( $this, 'custom_orderby' ) );
 		}
 
 		/**
@@ -152,8 +162,6 @@ if ( ! class_exists( 'Jobs' ) ) {
 			// Nonce field to validate form request from current site.
 			wp_nonce_field( self::META_BOX_DATA, self::META_BOX_NONCE );
 
-			settings_errors();
-
 			// Get all the meta data.
 			$data = self::get_data( $post->ID );
 
@@ -171,11 +179,13 @@ if ( ! class_exists( 'Jobs' ) ) {
 			);
 			$settings->display_text_field( $args );
 
+			// Check if large date in the future and change it to no date
+			$end = isset( $data['end'] ) ? self::MAX_DATE === $data['end'] ? '' : $data['end'] : '';
 			$args = array(
 				'label-classes' => 'input-label',
 				'label-text'    => __( 'End Date', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['end'] ) ? $data['end'] : '',
+				'value'         => $end,
 				'name'          => 'end',
 				'type'          => 'date',
 				'id'            => 'end',
@@ -196,9 +206,9 @@ if ( ! class_exists( 'Jobs' ) ) {
 				'label-classes' => 'input-label',
 				'label-text'    => __( 'Company URL', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['company-url'] ) ? $data['company-url'] : '',
-				'name'          => 'company-url',
-				'id'            => 'company-url',
+				'value'         => isset( $data['company_url'] ) ? $data['company_url'] : '',
+				'name'          => 'company_url',
+				'id'            => 'company_url',
 			);
 			$settings->display_text_field( $args );
 
@@ -233,22 +243,20 @@ if ( ! class_exists( 'Jobs' ) ) {
 				return;
 			}
 			// Now that we're authenticated, time to save the data.
-			// This sanitizes the data from the field and saves it into a meta array.
-			$meta                = array();
-			$meta['start']       = isset( $_POST['start'] ) ? sanitize_text_field( $_POST['start'] ) : '';
-			$meta['end']         = isset( $_POST['end'] ) ? sanitize_text_field( $_POST['end'] ) : '';
-			$meta['company']     = isset( $_POST['company'] ) ? sanitize_text_field( $_POST['company'] ) : '';
-			$meta['company-url'] = isset( $_POST['company-url'] ) ? esc_url_raw( $_POST['company-url'], array( 'http', 'https' ) ) : '';
-			$meta['location']    = isset( $_POST['location'] ) ? sanitize_text_field( $_POST['location'] ) : '';
-			update_post_meta( $post_id, self::META_DATA_KEY, $meta );
-		}
-
-		public function missing_start() {
-			?>
-			<div class="error notice">
-        		<p><?php _e( 'Job start date is required', 'weop' ); ?></p>
-    		</div>
-			<?php
+			$data = sanitize_text_field( $_POST['start'] );
+			update_post_meta( $post_id, '_meta_jobs_start', $data );
+			$data = sanitize_text_field( $_POST['end'] );
+			if ('' === $data) {
+				// No end dat set to large date in the future
+				$data = self::MAX_DATE;
+			}
+			update_post_meta( $post_id, '_meta_jobs_end', $data );
+			$data = sanitize_text_field( $_POST['company'] );
+			update_post_meta( $post_id, '_meta_jobs_company', $data );
+			$data = esc_url_raw( $_POST['company_url'], array( 'http', 'https' ) );
+			update_post_meta( $post_id, '_meta_jobs_company_url', $data );
+			$data = sanitize_text_field( $_POST['location'] );
+			update_post_meta( $post_id, '_meta_jobs_location', $data );
 		}
 
 		/**
@@ -293,10 +301,11 @@ if ( ! class_exists( 'Jobs' ) ) {
 			if ( 'start' === $column_name ) {
 				echo esc_attr( $data['start'] );
 			} elseif ( 'end' === $column_name ) {
-				echo ( '' === $data['end'] ) ? 'Present' : esc_attr( $data['end'] );
+				// MAX_DATE is a large date in the future representing being presently at the job
+				echo ( self::MAX_DATE === $data['end'] ) ? 'Present' : esc_attr( $data['end'] );
 			} elseif ( 'company' === $column_name ) {
-				if ( isset( $data['company-url'] ) ) {
-					echo '<a href="' . esc_url( $data['company-url'] ) .
+				if ( isset( $data['company_url'] ) ) {
+					echo '<a href="' . esc_url( $data['company_url'] ) .
 					'" target="_blank" title="Go To ' .
 					esc_attr( $data['company'] ) . '">' .
 					esc_attr( $data['company'] ) . '</a>';
@@ -318,6 +327,35 @@ if ( ! class_exists( 'Jobs' ) ) {
 			$columns['location'] = 'location';
 
 			return $columns;
+		}
+
+		/**
+		 * Custom order by function
+		 *
+		 * @param object $query The WordPress database query object
+		 */
+		function custom_orderby( $query ) {
+			if ( ! is_admin() )
+			  return;
+		  
+			$meta_key_array = self::get_meta_key();
+			$orderby = $query->get( 'orderby');
+
+			switch( $orderby ) {
+				case 'start':
+				case 'end':
+					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
+					$query->set( 'meta_type', 'DATE' );
+					$query->set( 'orderby', 'meta_value' );
+					break;
+				case 'company':
+				case 'location':
+					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
+					$query->set( 'orderby', 'meta_value' );
+				break;
+				default:
+					break;
+			}
 		}
 
 	}

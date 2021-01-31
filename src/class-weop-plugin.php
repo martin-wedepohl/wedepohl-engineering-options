@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.0';
+		const PLUGIN_VERSION = '0.1.1';
 
 		/**
 		 * Plugin name
