@@ -71,6 +71,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 			$location    = get_post_meta( $post_id, $meta_key_array['location'], true );
 
 			$data = array(
+				'job'         => get_the_title( $post_id ),
 				'start'       => sanitize_text_field( $start ),
 				'end'         => sanitize_text_field( $end ),
 				'company'     => sanitize_text_field( $company ),
@@ -91,6 +92,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 			add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_sortable_columns', array( $this, 'table_sort' ) );
 			add_action( 'pre_get_posts', array( $this, 'custom_orderby' ) );
+			add_shortcode( 'get_all_jobs', array( $this, 'get_all_jobs' ) );
 		}
 
 		/**
@@ -181,7 +183,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 			$settings->display_text_field( $args );
 
 			// Check if large date in the future and change it to no date
-			$end = isset( $data['end'] ) ? self::MAX_DATE === $data['end'] ? '' : $data['end'] : '';
+			$end  = isset( $data['end'] ) ? self::MAX_DATE === $data['end'] ? '' : $data['end'] : '';
 			$args = array(
 				'label-classes' => 'input-label',
 				'label-text'    => __( 'End Date', 'weop' ),
@@ -252,7 +254,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 				// No end dat set to large date in the future
 				$data = self::MAX_DATE;
 			}
-			update_post_meta( $post_id, $meta_key_array['start'], $data );
+			update_post_meta( $post_id, $meta_key_array['end'], $data );
 			$data = sanitize_text_field( $_POST['company'] );
 			update_post_meta( $post_id, $meta_key_array['company'], $data );
 			$data = esc_url_raw( $_POST['company_url'], array( 'http', 'https' ) );
@@ -360,6 +362,54 @@ if ( ! class_exists( 'Jobs' ) ) {
 			}
 		}
 
-	}
+		public function get_all_jobs() {
 
+			$meta_key_array = self::get_meta_key();
+
+			// $args = array(
+			// 	'post_type'      => 'jobs',
+			// 	'post_status'    => 'publish',
+			// 	'posts_per_page' => -1,
+			// 	'order'          => 'DESC',
+			// 	'orderby'        => 'meta_value',
+			// 	'meta_type'      => 'DATE',
+			// 	'meta_key'       => $meta_key_array['end'],
+			// );
+
+			$args = array(
+				'post_type'      => 'jobs',
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'meta_type'      => 'DATE',
+				'meta_query'     => array(
+					'job_start'  => array(
+						'key'     => $meta_key_array['start'],
+						'compare' => 'EXISTS',
+					),
+					'job_end'    => array(
+						'key'     => $meta_key_array['end'],
+						'compare' => 'EXISTS',
+					),
+				),
+				'orderby'        => array(
+					'job_end'   => 'DESC',
+					'job_start' => 'ASC',
+				),
+			);
+
+			$loop = new \WP_Query( $args );
+
+			$html = '';
+			while ( $loop->have_posts() ) :
+				$loop->the_post();
+				$post  = $loop->post;
+				$data  = self::get_data( $post->ID );
+				$html .= '<div><div>Job: ' . $data['job'] . '</div><div>Content: ' . get_the_content() . '</div><div>Start: ' . $data['start'] . '</div><div>End: ' . $data['end'] . '</div><div>' . $data['company'] . '</div><div>URL: ' . $data['company_url'] . '</div><div>Location: ' . $data['location'] . '</div></div>';
+			endwhile;
+			\wp_reset_postdata();
+
+			return $html;
+		}
+
+	}
 }

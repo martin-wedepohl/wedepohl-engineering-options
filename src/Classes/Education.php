@@ -66,14 +66,13 @@ if ( ! class_exists( 'Education' ) ) {
 			$meta_key_array = self::get_meta_key();
 
 			$year        = get_post_meta( $post_id, $meta_key_array['year'], true );
-			$course      = get_post_meta( $post_id, $meta_key_array['course'], true );
 			$course_url  = get_post_meta( $post_id, $meta_key_array['course_url'], true );
 			$institution = get_post_meta( $post_id, $meta_key_array['institution'], true );
 			$seminar     = get_post_meta( $post_id, $meta_key_array['seminar'], true );
 
 			$data = array(
 				'year'        => sanitize_text_field( $year ),
-				'course'      => sanitize_text_field( $course ),
+				'course'      => get_the_title( $post_id ),
 				'course_url'  => esc_url( $course_url ),
 				'institution' => sanitize_text_field( $institution ),
 				'seminar'     => sanitize_text_field( $seminar ),
@@ -86,13 +85,14 @@ if ( ! class_exists( 'Education' ) ) {
 		 * Class constructor
 		 */
 		public function __construct() {
-			$this->max_year = date('Y');
+			$this->max_year = gmdate( 'Y' );
 			add_action( 'init', array( $this, 'register' ) );
 			add_action( 'save_post', array( $this, 'save_meta' ), 1, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_columns', array( $this, 'table_head' ) );
 			add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_sortable_columns', array( $this, 'table_sort' ) );
 			add_action( 'pre_get_posts', array( $this, 'custom_orderby' ) );
+			add_shortcode( 'get_all_education', array( $this, 'get_all_education' ) );
 		}
 
 		/**
@@ -236,6 +236,7 @@ if ( ! class_exists( 'Education' ) ) {
 			}
 			// Now that we're authenticated, time to save the data.
 			$meta_key_array = self::get_meta_key();
+
 			$data = sanitize_text_field( $_POST['year'] );
 			update_post_meta( $post_id, $meta_key_array['year'], $data );
 			$data = esc_url_raw( $_POST['course_url'], array( 'http', 'https' ) );
@@ -304,9 +305,11 @@ if ( ! class_exists( 'Education' ) ) {
 
 		/**
 		 * Sort the custom post type by meta data
+		 *
+		 * @param array $columns Array of columns.
 		 */
 		public function table_sort( $columns ) {
-			$columns['year'] = 'year';
+			$columns['year']        = 'year';
 			$columns['institution'] = 'institution';
 
 			return $columns;
@@ -315,16 +318,16 @@ if ( ! class_exists( 'Education' ) ) {
 		/**
 		 * Custom order by function
 		 *
-		 * @param object $query The WordPress database query object
+		 * @param object $query The WordPress database query object.
 		 */
-		function custom_orderby( $query ) {
-			if ( ! is_admin() )
-			  return;
-		  
-			$meta_key_array = self::get_meta_key();
-			$orderby = $query->get( 'orderby');
+		public function custom_orderby( $query ) {
+			if ( false === is_admin() )
+				return;
 
-			switch( $orderby ) {
+			$meta_key_array = self::get_meta_key();
+			$orderby        = $query->get( 'orderby' );
+
+			switch ( $orderby ) {
 				case 'year':
 					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
 					$query->set( 'orderby', 'meta_value_num' );
@@ -332,10 +335,36 @@ if ( ! class_exists( 'Education' ) ) {
 				case 'institution':
 					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
 					$query->set( 'orderby', 'meta_value' );
-				break;
+					break;
 				default:
 					break;
 			}
+		}
+
+		public function get_all_education() {
+
+			$meta_key_array = self::get_meta_key();
+
+			$args = array(
+				'post_type' => 'education',
+				'post_status' => 'publish',
+				'posts_per_page' => -1,
+				'order' => 'DESC',
+				'orderby'   => 'meta_value_num',
+    			'meta_key'  => $meta_key_array['year'],
+			);
+
+			$loop = new \WP_Query( $args );
+
+			$html = '';
+			while ( $loop->have_posts() ) : $loop->the_post();
+				$post = $loop->post;
+				$data =  self::get_data( $post->ID );
+				$html .= '<div><div>Course: ' . $data['course'] . '</div><div>Year: ' . $data['year'] . '</div><div>URL: ' . $data['course_url'] . '</div><div>Institution: ' . $data['institution'] . '</div><div>Seminar: ' . $data['seminar'] . '</div></div>';
+			endwhile;
+			\wp_reset_postdata();
+
+			return $html;
 		}
 
 	}

@@ -31,7 +31,8 @@ const licenseFile = "./license.txt";
 const vendor = srcBase + "/vendor";
 
 const indexJsFile = "/script.js";
-const jsFiles = [indexJsFile];
+const adminJsFile = "/script-admin.js";
+const jsFiles = [indexJsFile, adminJsFile];
 
 // clean tasks
 const clean = () => del([distBase], {force: true});
@@ -97,9 +98,9 @@ const js = (done) => {
             })
         )
         .pipe( buffer() )
-        .pipe( mode.development(sourcemaps.init({loadMaps: true})))
-        .pipe( uglify() )
-        .pipe(mode.development(sourcemaps.write('.')))
+        .pipe( mode.development( sourcemaps.init( {loadMaps: true} ) ) )
+        .pipe( mode.production( uglify() ) )
+        .pipe(mode.development( sourcemaps.write('.', {includeContent: false, sourceRoot: '.' } ) ) )
         .pipe(dest(distBase + "/dist"));
     });
     done();

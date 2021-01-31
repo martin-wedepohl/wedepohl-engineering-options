@@ -12,3 +12,11 @@ input#start:not(:valid) {
 	font-size: .7rem;
 	text-transform: uppercase;
 }
+
+.quick-edit-inline {
+	display: inline-block;
+}
+
+.quick-edit-block {
+	display: block;
+}

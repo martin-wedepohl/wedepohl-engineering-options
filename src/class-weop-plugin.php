@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.2
+ * Version:     0.1.3
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.2';
+		const PLUGIN_VERSION = '0.1.3';
 
 		/**
 		 * Plugin name
@@ -129,7 +129,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		public function enqueue() {
 
 			wp_enqueue_style( 'weop_css', plugin_dir_url( __FILE__ ) . 'dist/css/style.min.css', array(), '0.1.0' );
-
+			wp_enqueue_script( 'weop_js', plugin_dir_url( __FILE__ ) . 'dist/js/script.min.js', array(), '0.1.0', true );
 		}
 
 		/**
@@ -138,7 +138,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		public function enqueue_admin() {
 
 			wp_enqueue_style( 'weop_admin_css', plugin_dir_url( __FILE__ ) . 'dist/css/style-admin.min.css', array(), '0.1.0' );
-			wp_enqueue_script( 'weop_js', plugin_dir_url( __FILE__ ) . 'dist/js/script.min.js', array(), '0.1.0', true );
+			wp_enqueue_script( 'weop_admin_js', plugin_dir_url( __FILE__ ) . 'dist/js/script-admin.min.js', array(), '0.1.0', true );
 
 		}
 
