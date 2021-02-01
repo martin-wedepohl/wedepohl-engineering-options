@@ -38,7 +38,6 @@ if ( ! class_exists( 'Education' ) ) {
 		public static function get_meta_key() {
 			return array(
 				'year'        => '_meta_education_year',
-				'course'      => '_meta_education_couse',
 				'course_url'  => '_meta_education_course_url',
 				'institution' => '_meta_education_institution',
 				'seminar'     => '_meta_education_seminar',
@@ -341,27 +340,63 @@ if ( ! class_exists( 'Education' ) ) {
 			}
 		}
 
-		public function get_all_education() {
+		public function get_all_education( $atts ) {
 
 			$meta_key_array = self::get_meta_key();
 
+			$atts = shortcode_atts(
+				array(
+					'show_seminars' => false,
+				),
+				$atts,
+				'get_all_education'
+			);
+
+			if ( false === $atts['show_seminars'] ) {
+				$seminar_compare = 'NOT EXISTS';
+			} else {
+				$seminar_compare = 'EXISTS';
+			}
+
+			$meta_query = array(
+				'year' => array(
+					'key'     => $meta_key_array['year'],
+					'compare' => 'EXISTS',
+				),
+				'seminar' => array(
+					'key'     => $meta_key_array['seminar'],
+					'compare' => $seminar_compare,
+				),
+			);
+
 			$args = array(
-				'post_type' => 'education',
-				'post_status' => 'publish',
+				'post_type'      => 'education',
+				'post_status'    => 'publish',
 				'posts_per_page' => -1,
-				'order' => 'DESC',
-				'orderby'   => 'meta_value_num',
-    			'meta_key'  => $meta_key_array['year'],
+				'meta_query'     => $meta_query,
+				'orderby'        => array(
+					'year' => 'DESC',
+				)
 			);
 
 			$loop = new \WP_Query( $args );
 
 			$html = '';
-			while ( $loop->have_posts() ) : $loop->the_post();
-				$post = $loop->post;
-				$data =  self::get_data( $post->ID );
-				$html .= '<div><div>Course: ' . $data['course'] . '</div><div>Year: ' . $data['year'] . '</div><div>URL: ' . $data['course_url'] . '</div><div>Institution: ' . $data['institution'] . '</div><div>Seminar: ' . $data['seminar'] . '</div></div>';
-			endwhile;
+			while ( $loop->have_posts() ) {
+				$loop->the_post();
+				$post  = $loop->post;
+				$data  = self::get_data( $post->ID );
+
+				$html .= '<div class="education" id="education-' . $post->ID . '">';
+				if ( '' === $data['course_url'] ) {
+					$html .= '<span class="education-course">' . $data['course'] . '</span>';
+				} else {
+					$html .= '<span class="education-course"><a href="' . $data['course_url'] . '" title="Click to view course" target="_blank">' . $data['course'] . '</a></span>';
+				}
+				$html .= '<span class="education-institution">' . $data['institution'] . '</span>';
+				$html .= '<span class="education-year">' . $data['year'] . '</span>';
+				$html .= '</div>';
+			}
 			\wp_reset_postdata();
 
 			return $html;

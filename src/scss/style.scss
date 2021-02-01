@@ -1,0 +1,60 @@
+div.education {
+	margin-top: 0;
+	margin-bottom: .8em;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.education,
+.job {
+	display: flex;
+	flex-direction: column;
+	font-size: 1.1rem;
+	line-height: 1.4;
+}
+
+.job-company {
+	display: flex;
+	flex-direction: column;
+}
+
+.job-date {
+	margin-bottom: 1em;
+}
+
+.job p {
+	margin-bottom: 1em;
+	font-size: 1.1rem;
+	line-height: 1.5;
+}
+
+.job-divider {
+	width: 100%;
+	margin: 1em auto;
+	border-bottom-color: #ccc;
+}
+
+@media (min-width: 768px) {
+	div.education {
+		margin-bottom: .25em;
+	}
+
+	.education {
+		flex-direction: row;
+		gap: .5em;
+	}
+
+	.education-course::before {
+		content: '🞛 ';
+	}
+
+	.education-course::after,
+	.education-institution::after {
+		content: ', ';
+	}
+
+	.job-company {
+		flex-direction: row;
+	}
+	
+}

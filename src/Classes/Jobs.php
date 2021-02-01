@@ -71,7 +71,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 			$location    = get_post_meta( $post_id, $meta_key_array['location'], true );
 
 			$data = array(
-				'job'         => get_the_title( $post_id ),
+				'title'       => get_the_title( $post_id ),
 				'start'       => sanitize_text_field( $start ),
 				'end'         => sanitize_text_field( $end ),
 				'company'     => sanitize_text_field( $company ),
@@ -366,16 +366,6 @@ if ( ! class_exists( 'Jobs' ) ) {
 
 			$meta_key_array = self::get_meta_key();
 
-			// $args = array(
-			// 	'post_type'      => 'jobs',
-			// 	'post_status'    => 'publish',
-			// 	'posts_per_page' => -1,
-			// 	'order'          => 'DESC',
-			// 	'orderby'        => 'meta_value',
-			// 	'meta_type'      => 'DATE',
-			// 	'meta_key'       => $meta_key_array['end'],
-			// );
-
 			$args = array(
 				'post_type'      => 'jobs',
 				'post_status'    => 'publish',
@@ -404,7 +394,25 @@ if ( ! class_exists( 'Jobs' ) ) {
 				$loop->the_post();
 				$post  = $loop->post;
 				$data  = self::get_data( $post->ID );
-				$html .= '<div><div>Job: ' . $data['job'] . '</div><div>Content: ' . get_the_content() . '</div><div>Start: ' . $data['start'] . '</div><div>End: ' . $data['end'] . '</div><div>' . $data['company'] . '</div><div>URL: ' . $data['company_url'] . '</div><div>Location: ' . $data['location'] . '</div></div>';
+
+				$html .= '<div class="job" id="job-' . $post->ID . '">';
+				$html .= '<span class="job-title">' . $data['title'] . '</span>';
+				if ( '' === $data['company_url'] ) {
+					$html .= '<span class="job-company"><span>' . $data['company'] . ',&nbsp;</span>';
+				} else {
+					$html .= '<span class="job-company"><span><a href="' . $data['company_url'] . '" title="Click to view company" target="_blank">' . $data['company'] . '</a>,&nbsp;</span>';
+				}
+				$html .= '<span>' . $data['location'] . '</span></span>';
+				$start = gmdate( 'F Y', \strtotime( $data['start'] ) );
+				if ( self::MAX_DATE === $data['end'] ) {
+					$end = 'Present';
+				} else {
+					$end = gmdate( 'F Y', \strtotime( $data['end'] ) );
+				}
+				$html .= '<span class="job-date">' . $start . ' to ' . $end . '</span>';
+				$html .= '<span class="job-content">' . get_the_content( $post->ID ) . '</span>';
+				$html .= '<hr class="job-divider">';
+				$html .= '</div>';
 			endwhile;
 			\wp_reset_postdata();
 
