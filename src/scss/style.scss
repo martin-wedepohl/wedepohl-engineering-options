@@ -5,6 +5,29 @@ div.education {
 	padding-bottom: 0;
 }
 
+.admin-bar .education-title,
+.admin-bar .skills-title,
+.admin-bar .work-experience-title,
+.admin-bar .activities-title {
+	padding-top: 46px;
+}
+
+.education-title,
+.skills-title,
+.work-experience-title,
+.activities-title {
+	display: flex;
+	flex-direction: column;
+}
+
+.education-title span,
+.skills-title span,
+.work-experience-title span,
+.activities-title span {
+	font-size: .75rem;
+	margin-bottom: 1em;
+}
+
 .education,
 .job {
 	display: flex;
@@ -22,19 +45,48 @@ div.education {
 	margin-bottom: 1em;
 }
 
-.job p {
-	margin-bottom: 1em;
-	font-size: 1.1rem;
+.job-content p,
+.project-content p {
+	margin-bottom: 1em;;
 	line-height: 1.5;
 }
 
-.job-divider {
+.activity-divider,
+.education-divider,
+.job-divider,
+.project-divider {
 	width: 100%;
 	margin: 1em auto;
 	border-bottom-color: #ccc;
 }
 
 @media (min-width: 768px) {
+
+	.admin-bar .education-title,
+	.admin-bar .skills-title,
+	.admin-bar .work-experience-title,
+	.admin-bar .activities-title {
+		padding-top: 32px;
+	}
+	
+	.education-title,
+	.skills-title,
+	.work-experience-title,
+	.activities-title {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1em;
+	}
+
+	.education-title span,
+	.skills-title span,
+	.work-experience-title span,
+	.activities-title span {
+		margin-bottom: 0;
+	}
+
+
 	div.education {
 		margin-bottom: .25em;
 	}
@@ -42,6 +94,10 @@ div.education {
 	.education {
 		flex-direction: row;
 		gap: .5em;
+	}
+
+	.education-divider {
+		display: none;
 	}
 
 	.education-course::before {
@@ -56,5 +112,5 @@ div.education {
 	.job-company {
 		flex-direction: row;
 	}
-	
+
 }

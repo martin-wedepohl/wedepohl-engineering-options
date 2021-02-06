@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.5
+ * Version:     0.1.6
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -89,6 +89,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			register_deactivation_hook( __FILE__, array( $this, 'deactivation' ) );
 			register_uninstall_hook( __FILE__, array( 'WEOP_Plugin', 'weop_uninstall' ) );
 
+			// Setup enqueue actions
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin' ) );
 
@@ -102,6 +103,9 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			// Add Google Analytics to head.
 			add_action( 'wp_head', array( $this, 'add_analytics_in_header' ), 0 );
+
+			// Add page templates
+			add_filter( 'page_template', array( $this, 'load_page_template' ) );
 
 		}
 
@@ -419,19 +423,31 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 * Load the template for different files.
 		 * Can be overriden by a file in the theme directory
 		 *
-		 * Plugin directory: templates
+		 * Plugin directory: includes/templates
 		 * Theme directory: plugins/wedepohl-engineering-options/templates
 		 *
-		 * @global array $post
+		 * @param string $template Template file.
 		 *
 		 * @return string - Template to use
 		 */
-		public function load_resume_template() {
-
-			global $post;
+		public function load_page_template( $template ) : string {
 
 			if ( is_page( 'resume' ) ) {
-				$file        = 'templates/resume-template.php1';
+				$file        = 'templates/resume-template.php';
+				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
+				$plugin_file = $plugin_dir . $file;
+				$theme_dir   = get_stylesheet_directory() . '/plugins/wedepohl-engineering-options/';
+				$theme_file  = $theme_dir . $file;
+
+				if ( file_exists( $theme_file ) ) {
+					return $theme_file;
+				} elseif ( file_exists( $plugin_file ) ) {
+					return $plugin_file;
+				}
+			}
+
+			if ( is_page( 'additional-seminars' ) ) {
+				$file        = 'templates/seminars-template.php';
 				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
 				$plugin_file = $plugin_dir . $file;
 				$theme_dir   = get_stylesheet_directory() . '/plugins/wedepohl-engineering-options/';
