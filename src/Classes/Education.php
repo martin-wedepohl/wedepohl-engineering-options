@@ -30,12 +30,17 @@ if ( ! class_exists( 'Education' ) ) {
 		const META_BOX_DATA  = 'weop_education_save_meta_box_data';
 		const META_BOX_NONCE = 'weo_education_meta_box_nonce';
 
+		/**
+		 * Maximum year.
+		 */
 		private $max_year = 0;
 
 		/**
 		 * Return the meta key
+		 *
+		 * @return array The array of meta keys
 		 */
-		public static function get_meta_key() {
+		public static function get_meta_key() : array {
 			return array(
 				'year'        => '_meta_education_year',
 				'course_url'  => '_meta_education_course_url',
@@ -46,8 +51,10 @@ if ( ! class_exists( 'Education' ) ) {
 
 		/**
 		 * Return the post type
+		 *
+		 * @return string The post type
 		 */
-		public static function get_post_type() {
+		public static function get_post_type() : string {
 			return self::POST_TYPE;
 		}
 
@@ -60,7 +67,7 @@ if ( ! class_exists( 'Education' ) ) {
 		 *
 		 * @return array Associative array with all the meta data
 		 */
-		public static function get_data( $post_id ) {
+		public static function get_data( $post_id ) : array {
 
 			$meta_key_array = self::get_meta_key();
 
@@ -91,7 +98,7 @@ if ( ! class_exists( 'Education' ) ) {
 			add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_sortable_columns', array( $this, 'table_sort' ) );
 			add_action( 'pre_get_posts', array( $this, 'custom_orderby' ) );
-			add_shortcode( 'get_all_education', array( $this, 'get_all_education' ) );
+			add_shortcode( 'weop_education', array( $this, 'get_education' ) );
 		}
 
 		/**
@@ -220,8 +227,6 @@ if ( ! class_exists( 'Education' ) ) {
 		 *
 		 * @param int   $post_id The post ID.
 		 * @param array $post    The post.
-		 *
-		 * @return int The post ID.
 		 */
 		public function save_meta( $post_id, $post ) {
 			// Checks save status.
@@ -253,7 +258,7 @@ if ( ! class_exists( 'Education' ) ) {
 		 *
 		 * @return array Modified array of headers.
 		 */
-		public function table_head( $columns ) {
+		public function table_head( $columns ) : array {
 			$newcols = array();
 			// Want the selection box and title (name for our custom post type) first.
 			$newcols['cb'] = $columns['cb'];
@@ -307,7 +312,7 @@ if ( ! class_exists( 'Education' ) ) {
 		 *
 		 * @param array $columns Array of columns.
 		 */
-		public function table_sort( $columns ) {
+		public function table_sort( $columns ) : array {
 			$columns['year']        = 'year';
 			$columns['institution'] = 'institution';
 
@@ -322,6 +327,10 @@ if ( ! class_exists( 'Education' ) ) {
 		public function custom_orderby( $query ) {
 			if ( false === is_admin() )
 				return;
+
+			if ( self::POST_TYPE !== $query->get( 'post_type' ) ) {
+				return;
+			}
 
 			$meta_key_array = self::get_meta_key();
 			$orderby        = $query->get( 'orderby' );
@@ -340,7 +349,16 @@ if ( ! class_exists( 'Education' ) ) {
 			}
 		}
 
-		public function get_all_education( $atts ) {
+		/**
+		 * Shortcode to return all the education or seminars
+		 *
+		 * [weop_education show_seminars="false"]
+		 *
+		 * @param array $atts Array of shortcode attributes.
+		 *
+		 * @return string The HTML string of all the jobs
+		 */
+		public function get_education( $atts ) : string {
 
 			$meta_key_array = self::get_meta_key();
 
@@ -349,7 +367,7 @@ if ( ! class_exists( 'Education' ) ) {
 					'show_seminars' => false,
 				),
 				$atts,
-				'get_all_education'
+				'get_education'
 			);
 
 			if ( false === $atts['show_seminars'] ) {
@@ -359,7 +377,7 @@ if ( ! class_exists( 'Education' ) ) {
 			}
 
 			$meta_query = array(
-				'year' => array(
+				'year'    => array(
 					'key'     => $meta_key_array['year'],
 					'compare' => 'EXISTS',
 				),
@@ -370,7 +388,7 @@ if ( ! class_exists( 'Education' ) ) {
 			);
 
 			$args = array(
-				'post_type'      => 'education',
+				'post_type'      => self::POST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'meta_query'     => $meta_query,
@@ -379,27 +397,32 @@ if ( ! class_exists( 'Education' ) ) {
 				)
 			);
 
-			$loop = new \WP_Query( $args );
+			$loop = new \WP_Query( apply_filters( 'weop_education_query', $args ) );
 
 			$html = '';
-			while ( $loop->have_posts() ) {
-				$loop->the_post();
-				$post  = $loop->post;
-				$data  = self::get_data( $post->ID );
+			if ( $loop->have_posts() ) {
+				while ( $loop->have_posts() ) {
+					$loop->the_post();
+					$post  = $loop->post;
+					$data  = self::get_data( $post->ID );
 
-				$html .= '<div class="education" id="education-' . $post->ID . '">';
-				if ( '' === $data['course_url'] ) {
-					$html .= '<span class="education-course">' . $data['course'] . '</span>';
-				} else {
-					$html .= '<span class="education-course"><a href="' . $data['course_url'] . '" title="Click to view course" target="_blank">' . $data['course'] . '</a></span>';
+					do_action( 'weop_education_before' );
+					$html .= '<div class="education" id="education-' . $post->ID . '">';
+					if ( '' === $data['course_url'] ) {
+						$html .= '<span class="education-course">' . $data['course'] . '</span>';
+					} else {
+						$html .= '<span class="education-course"><a href="' . $data['course_url'] . '" title="Click to view course" target="_blank">' . $data['course'] . '</a></span>';
+					}
+					$html .= '<span class="education-institution">' . $data['institution'] . '</span>';
+					$html .= '<span class="education-year">' . $data['year'] . '</span>';
+					$html .= '<hr class="education-divider">';
+					$html .= '</div>';
+					do_action( 'weop_education_after' );
 				}
-				$html .= '<span class="education-institution">' . $data['institution'] . '</span>';
-				$html .= '<span class="education-year">' . $data['year'] . '</span>';
-				$html .= '</div>';
 			}
 			\wp_reset_postdata();
 
-			return $html;
+			return apply_filters( 'weop_education_html', $html );
 		}
 
 	}

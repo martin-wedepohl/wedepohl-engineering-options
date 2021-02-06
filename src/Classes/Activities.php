@@ -1,11 +1,11 @@
 <?php
 /**
- * Jobs custom post type
+ * Activities custom post type
  *
  * PHP Version 7
  *
  * @category WEOP
- * @package  Jobs
+ * @package  Activities
  * @author   Martin Wedepohl <martin@wedepohlengineering.com>
  * @license  GPL3 or later
  */
@@ -19,39 +19,37 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 defined( 'ABSPATH' ) || die( '' );
 
-if ( ! class_exists( 'Jobs' ) ) {
+if ( ! class_exists( 'Activities' ) ) {
 
 	/**
-	 * Jobs custom post type
+	 * Activities custom post type
 	 */
-	class Jobs {
+	class Activities {
 
 		const MAX_DATE       = '9999-12-31';
-		const POST_TYPE      = 'jobs';
-		const META_BOX_DATA  = 'weop_jobs_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_jobs_meta_box_nonce';
+		const POST_TYPE      = 'activities';
+		const META_BOX_DATA  = 'weop_activities_save_meta_box_data';
+		const META_BOX_NONCE = 'weo_activities_meta_box_nonce';
+
+		/**
+		 * The maximum year.
+		 */
+		private $max_year = 0;
 
 		/**
 		 * Return the meta key
-		 *
-		 * @return array The array of meta keys
 		 */
-		public static function get_meta_key() : array {
+		public static function get_meta_key() {
 			return array(
-				'start'       => '_meta_jobs_start',
-				'end'         => '_meta_jobs_end',
-				'company'     => '_meta_jobs_company',
-				'company_url' => '_meta_jobs_company_url',
-				'location'    => '_meta_jobs_location',
+				'start' => '_meta_activities_start',
+				'end'   => '_meta_activities_end',
 			);
 		}
 
 		/**
 		 * Return the post type
-		 *
-		 * @return string The post type
 		 */
-		public static function get_post_type() : string {
+		public static function get_post_type() {
 			return self::POST_TYPE;
 		}
 
@@ -64,23 +62,16 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 *
 		 * @return array Associative array with all the meta data
 		 */
-		public static function get_data( $post_id ) : array {
+		public static function get_data( $post_id ) {
 
 			$meta_key_array = self::get_meta_key();
 
-			$start       = get_post_meta( $post_id, $meta_key_array['start'], true );
-			$end         = get_post_meta( $post_id, $meta_key_array['end'], true );
-			$company     = get_post_meta( $post_id, $meta_key_array['company'], true );
-			$company_url = get_post_meta( $post_id, $meta_key_array['company_url'], true );
-			$location    = get_post_meta( $post_id, $meta_key_array['location'], true );
+			$start = get_post_meta( $post_id, $meta_key_array['start'], true );
+			$end   = get_post_meta( $post_id, $meta_key_array['end'], true );
 
 			$data = array(
-				'title'       => get_the_title( $post_id ),
-				'start'       => sanitize_text_field( $start ),
-				'end'         => sanitize_text_field( $end ),
-				'company'     => sanitize_text_field( $company ),
-				'company_url' => esc_url( $company_url ),
-				'location'    => sanitize_text_field( $location ),
+				'start' => sanitize_text_field( $start ),
+				'end'   => sanitize_text_field( $end ),
 			);
 
 			return $data;
@@ -90,13 +81,14 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 * Class constructor
 		 */
 		public function __construct() {
+			$this->max_year = gmdate( 'Y' );
 			add_action( 'init', array( $this, 'register' ) );
 			add_action( 'save_post', array( $this, 'save_meta' ), 1, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_columns', array( $this, 'table_head' ) );
 			add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_sortable_columns', array( $this, 'table_sort' ) );
 			add_action( 'pre_get_posts', array( $this, 'custom_orderby' ) );
-			add_shortcode( 'weop_jobs', array( $this, 'get_jobs' ) );
+			add_shortcode( 'weop_activities', array( $this, 'get_activities' ) );
 		}
 
 		/**
@@ -104,26 +96,26 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 */
 		public function register() {
 			$labels = array(
-				'name'               => __( 'Jobs', 'weop' ),
-				'singular_name'      => __( 'Job', 'weop' ),
-				'menu_name'          => __( 'Jobs', 'weop' ),
-				'parent_item_colon'  => __( 'Parent Job', 'weop' ),
-				'all_items'          => __( 'All Jobs', 'weop' ),
-				'view_item'          => __( 'View Job', 'weop' ),
-				'add_new_item'       => __( 'Add New Job', 'weop' ),
+				'name'               => __( 'Activities', 'weop' ),
+				'singular_name'      => __( 'Activity', 'weop' ),
+				'menu_name'          => __( 'Activity', 'weop' ),
+				'parent_item_colon'  => __( 'Parent Activity', 'weop' ),
+				'all_items'          => __( 'All Activities', 'weop' ),
+				'view_item'          => __( 'View Activity', 'weop' ),
+				'add_new_item'       => __( 'Add New Activity', 'weop' ),
 				'add_new'            => __( 'Add New', 'weop' ),
-				'edit_item'          => __( 'Edit Job', 'weop' ),
-				'update_item'        => __( 'Update Job', 'weop' ),
-				'search_items'       => __( 'Search Jobs', 'weop' ),
-				'not_found'          => __( 'Job Not Found', 'weop' ),
-				'not_found_in_trash' => __( 'Job Not Found in Trash', 'weop' ),
+				'edit_item'          => __( 'Edit Activity', 'weop' ),
+				'update_item'        => __( 'Update Activity', 'weop' ),
+				'search_items'       => __( 'Search Activities', 'weop' ),
+				'not_found'          => __( 'Activity Not Found', 'weop' ),
+				'not_found_in_trash' => __( 'Activity Not Found in Trash', 'weop' ),
 			);
 
 			$args = array(
-				'label'                => __( 'jobs', 'weop' ),
-				'description'          => __( 'Jobs', 'weop' ),
+				'label'                => __( 'activity', 'weop' ),
+				'description'          => __( 'Activity', 'weop' ),
 				'labels'               => $labels,
-				'supports'             => array( 'title', 'editor' ),
+				'supports'             => array( 'title' ),
 				'hierarchical'         => false,
 				'public'               => true,
 				'show_ui'              => true,
@@ -151,7 +143,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 		public function register_meta_box() {
 			add_meta_box(
 				'information_section',
-				__( 'Job Information', 'weop' ),
+				__( 'Activity Information', 'weop' ),
 				array( $this, 'meta_box' ),
 				self::POST_TYPE,
 				'side',
@@ -176,56 +168,24 @@ if ( ! class_exists( 'Jobs' ) ) {
 
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'Start Date', 'weop' ),
-				'required'      => true,
+				'label-text'    => __( 'Start Year', 'weop' ),
 				'classes'       => 'width-100',
 				'value'         => isset( $data['start'] ) ? $data['start'] : '',
-				'name'          => 'start',
 				'type'          => 'date',
+				'name'          => 'start',
 				'id'            => 'start',
 			);
 			$settings->display_text_field( $args );
 
-			// Check if large date in the future and change it to no date.
 			$end  = isset( $data['end'] ) ? self::MAX_DATE === $data['end'] ? '' : $data['end'] : '';
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'End Date', 'weop' ),
+				'label-text'    => __( 'End Year', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => $end,
-				'name'          => 'end',
+				'value'         => $data,
 				'type'          => 'date',
+				'name'          => 'end',
 				'id'            => 'end',
-			);
-			$settings->display_text_field( $args );
-
-			$args = array(
-				'label-classes' => 'input-label',
-				'label-text'    => __( 'Company', 'weop' ),
-				'classes'       => 'width-100',
-				'value'         => isset( $data['company'] ) ? $data['company'] : '',
-				'name'          => 'company',
-				'id'            => 'company',
-			);
-			$settings->display_text_field( $args );
-
-			$args = array(
-				'label-classes' => 'input-label',
-				'label-text'    => __( 'Company URL', 'weop' ),
-				'classes'       => 'width-100',
-				'value'         => isset( $data['company_url'] ) ? $data['company_url'] : '',
-				'name'          => 'company_url',
-				'id'            => 'company_url',
-			);
-			$settings->display_text_field( $args );
-
-			$args = array(
-				'label-classes' => 'input-label',
-				'label-text'    => __( 'Location', 'weop' ),
-				'classes'       => 'width-100',
-				'value'         => isset( $data['location'] ) ? $data['location'] : '',
-				'name'          => 'location',
-				'id'            => 'location',
 			);
 			$settings->display_text_field( $args );
 
@@ -236,6 +196,8 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 *
 		 * @param int   $post_id The post ID.
 		 * @param array $post    The post.
+		 *
+		 * @return int The post ID.
 		 */
 		public function save_meta( $post_id, $post ) {
 			// Checks save status.
@@ -249,7 +211,8 @@ if ( ! class_exists( 'Jobs' ) ) {
 			}
 			// Now that we're authenticated, time to save the data.
 			$meta_key_array = self::get_meta_key();
-			$data           = sanitize_text_field( $_POST['start'] );
+
+			$data = sanitize_text_field( $_POST['start'] );
 			update_post_meta( $post_id, $meta_key_array['start'], $data );
 			$data = sanitize_text_field( $_POST['end'] );
 			if ( '' === $data ) {
@@ -257,33 +220,25 @@ if ( ! class_exists( 'Jobs' ) ) {
 				$data = self::MAX_DATE;
 			}
 			update_post_meta( $post_id, $meta_key_array['end'], $data );
-			$data = sanitize_text_field( $_POST['company'] );
-			update_post_meta( $post_id, $meta_key_array['company'], $data );
-			$data = esc_url_raw( $_POST['company_url'], array( 'http', 'https' ) );
-			update_post_meta( $post_id, $meta_key_array['company_url'], $data );
-			$data = sanitize_text_field( $_POST['location'] );
-			update_post_meta( $post_id, $meta_key_array['location'], $data );
 		}
 
 		/**
-		 * Display the table headers for custom columns in our order.
+		 * Display the table headers for custom columns in our order
 		 *
 		 * @param array $columns Array of headers.
 		 *
 		 * @return array Modified array of headers.
 		 */
-		public function table_head( $columns ) : array {
+		public function table_head( $columns ) {
 			$newcols = array();
 			// Want the selection box and title (name for our custom post type) first.
 			$newcols['cb'] = $columns['cb'];
 			unset( $columns['cb'] );
-			$newcols['title'] = 'Job';
+			$newcols['title'] = __( 'Activity', 'weop' );
 			unset( $columns['title'] );
 			// Our custom meta data columns.
-			$newcols['start']    = __( 'Start Date', 'weop' );
-			$newcols['end']      = __( 'End Date', 'weop' );
-			$newcols['company']  = __( 'Company', 'weop' );
-			$newcols['location'] = __( 'Location', 'weop' );
+			$newcols['start'] = __( 'Start Date', 'weop' );
+			$newcols['end']   = __( 'End Date', 'weop' );
 			// Want date last.
 			unset( $columns['date'] );
 			// Add all other selected columns.
@@ -305,44 +260,27 @@ if ( ! class_exists( 'Jobs' ) ) {
 			$data = self::get_data( $post_id );
 
 			if ( 'start' === $column_name ) {
-				$date  = \DateTime::createFromFormat( 'Y-m-d', $data['start'] );
-				$start = date_format( $date, 'F jS, Y' );
-				echo esc_html( $start );
+				$date = \DateTime::createFromFormat( 'Y-m-d', $data['start'] );
+				echo esc_attr( date_format( $date, 'F Y' ) );
 			} elseif ( 'end' === $column_name ) {
 				// MAX_DATE is a large date in the future representing being presently at the job.
 				if ( self::MAX_DATE === $data['end'] ) {
 					echo 'Present';
 				} else {
 					$date = \DateTime::createFromFormat( 'Y-m-d', $data['end'] );
-					$end  = date_format( $date, 'F jS, Y' );
-					echo esc_html( $end );
+					echo esc_attr( date_format( $date, 'F Y' ) );
 				}
-			} elseif ( 'company' === $column_name ) {
-				if ( isset( $data['company_url'] ) ) {
-					echo '<a href="' . esc_url( $data['company_url'] ) .
-					'" target="_blank" title="Go To ' .
-					esc_attr( $data['company'] ) . '">' .
-					esc_attr( $data['company'] ) . '</a>';
-				} else {
-					echo esc_attr( $data['company'] );
-				}
-			} elseif ( 'location' === $column_name ) {
-				echo esc_attr( $data['location'] );
 			}
 		}
 
 		/**
 		 * Sort the custom post type by meta data
 		 *
-		 * @param array $columns The array of sortable columns.
-		 *
-		 * @return array The columns for sorting
+		 * @param array $columns Array of columns.
 		 */
-		public function table_sort( $columns ) : array {
-			$columns['start']    = 'start';
-			$columns['end']      = 'end';
-			$columns['company']  = 'company';
-			$columns['location'] = 'location';
+		public function table_sort( $columns ) {
+			$columns['start'] = 'start';
+			$columns['end']   = 'end';
 
 			return $columns;
 		}
@@ -353,15 +291,16 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 * @param object $query The WordPress database query object.
 		 */
 		public function custom_orderby( $query ) {
-			if ( false !== is_admin() )
+			if ( false === is_admin() ) {
 				return;
+			}
 
 			if ( self::POST_TYPE !== $query->get( 'post_type' ) ) {
 				return;
 			}
 
 			$meta_key_array = self::get_meta_key();
-			$orderby        = $query->get( 'orderby');
+			$orderby        = $query->get( 'orderby' );
 
 			switch ( $orderby ) {
 				case 'start':
@@ -370,58 +309,53 @@ if ( ! class_exists( 'Jobs' ) ) {
 					$query->set( 'meta_type', 'DATE' );
 					$query->set( 'orderby', 'meta_value' );
 					break;
-				case 'company':
-				case 'location':
-					$query->set( 'meta_key', $meta_key_array[ $orderby ] );
-					$query->set( 'orderby', 'meta_value' );
-					break;
 				default:
 					break;
 			}
 		}
 
 		/**
-		 * Shortcode to return all the jobs passing in an optional date format
+		 * Shortcode to return all the activities passing in an optional date format
 		 *
-		 * [weop_get_jobs date_format="F Y"]
+		 * [weop_activities date_format="F Y"]
 		 *
 		 * @param array $atts Array of shortcode attributes.
 		 *
-		 * @return string The HTML string of all the jobs
+		 * @return string The HTML string of all the activities
 		 */
-		public function get_jobs( $atts ) : string {
+		public function get_activities( $atts ) : string {
 
 			$meta_key_array = self::get_meta_key();
 
 			$args = array(
-				'post_type'      => self::POST_TYPE,
+				'post_type'      => 'activities',
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'meta_type'      => 'DATE',
 				'meta_query'     => array(
-					'job_start'  => array(
+					'start'  => array(
 						'key'     => $meta_key_array['start'],
 						'compare' => 'EXISTS',
 					),
-					'job_end'    => array(
+					'end'    => array(
 						'key'     => $meta_key_array['end'],
 						'compare' => 'EXISTS',
 					),
 				),
 				'orderby'        => array(
-					'job_end'   => 'DESC',
-					'job_start' => 'ASC',
+					'end'   => 'DESC',
+					'start' => 'ASC',
 				),
 			);
 
-			$loop = new \WP_Query( apply_filters( 'weop_jobs_query', $args ) );
+			$loop = new \WP_Query( apply_filters( 'weop_activities_query', $args ) );
 
 			$atts = shortcode_atts(
 				array(
 					'date_format' => 'F Y',
 				),
 				$atts,
-				'get_jobs'
+				'get_activities'
 			);
 
 			$html = '';
@@ -431,32 +365,34 @@ if ( ! class_exists( 'Jobs' ) ) {
 					$post  = $loop->post;
 					$data  = self::get_data( $post->ID );
 
-					do_action( 'weop_jobs_before' );
-					$html .= '<div class="job" id="job-' . $post->ID . '">';
-					$html .= '<span class="job-title">' . $data['title'] . '</span>';
-					if ( '' === $data['company_url'] ) {
-						$html .= '<span class="job-company"><span>' . $data['company'] . ',&nbsp;</span>';
-					} else {
-						$html .= '<span class="job-company"><span><a href="' . $data['company_url'] . '" title="Click to view company" target="_blank">' . $data['company'] . '</a>,&nbsp;</span>';
-					}
-					$html .= '<span>' . $data['location'] . '</span></span>';
-					$start = gmdate( $atts['date_format'], \strtotime( $data['start'] ) );
+					do_action( 'weop_activities_before' );
+					$html .= '<div class="activity" id="activity-' . $post->ID . '">';
+					$html .= '<span class="activity-title">' . \get_the_content( $post->ID ) . '</span>';
+
+					$date  = \DateTime::createFromFormat( 'Y-m-d', $data['start'] );
+					$start = date_format( $date, $atts['date_format'] );
+
+					// MAX_DATE is a large date in the future representing being presently at the job.
 					if ( self::MAX_DATE === $data['end'] ) {
 						$end = 'Present';
 					} else {
-						$end = gmdate( $atts['date_format'], \strtotime( $data['end'] ) );
+						$date = \DateTime::createFromFormat( 'Y-m-d', $data['end'] );
+						$end  = date_format( $date, $atts['date_format'] );
 					}
-					$html .= '<span class="job-date">' . $start . ' to ' . $end . '</span>';
-					$html .= '<span class="job-content">' . get_the_content( $post->ID ) . '</span>';
-					$html .= '<hr class="job-divider">';
+
+					$html .= '<span class="activity-start">' . $start . '</span>';
+					$html .= ' to ';
+					$html .= '<span class="activity-end">' . $end . '</span>';
+					$html .= '<hr class="activity-divider">';
 					$html .= '</div>';
-					do_action( 'weop_jobs_after' );
+					do_action( 'weop_activities_after' );
 				}
 			}
 			\wp_reset_postdata();
 
-			return apply_filters( 'weop_jobs_html', $html );
+			return apply_filters( 'weop_activities_html', $html );
 		}
 
 	}
+
 }

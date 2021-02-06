@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.4
+ * Version:     0.1.5
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -280,17 +280,33 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 	</ul>
 	<h2><?php esc_html_e( 'Shortcodes', 'weop' ); ?></h2>
 	<ul>
-		<li>[weop_jobs] - Return all the Jobs custom post types</li>
-		<li>[weop_education show_seminars=true] - Return all the Education with an optional show_seminar (default false) if the education is just a seminar</li>
-		<li>[weop_activities] - Return all the Activities</li>
+		<li>[weop_activities date_format="F Y"] - <?php esc_html_e( 'Return all the Activities with an optional date format', 'weop' ); ?> (F Y)</li>
+		<li>[weop_jobs date_format="F Y"] - <?php esc_html_e( 'Return all the Jobs with an optional date format', 'weop' ); ?> (F Y)</li>
+		<li>[weop_education show_seminars="false"] - <?php esc_html_e( 'Return all the Education with an optional show_seminar (default false) if the education is just a seminar', 'weop' ); ?></li>
+		<li>[weop_projects] - <?php esc_html_e( 'Return all the Projects', 'weop' ); ?></li>
 	</ul>
-	<h2><?php esc_html_e( 'Remove Shortcode', 'weop' ); ?></h2>
-	<pre>
-$shortcode_handler = apply_filter( 'get_weop_shortcode_instance', NULL );
-if( is_a( $shortcode_handler, 'weop_Shortcodes' ) {
-	// Do something with the instance of the handler
-}
-	</pre>
+	<h2><?php esc_html_e( 'Filters', 'weop' ); ?></h2>
+	<ul>
+		<li>weop_activities_query - <?php esc_html_e( 'Filter to alter the activities shortcode query', 'weop' ); ?></li>
+		<li>weop_activities_html - <?php esc_html_e( 'Filter to alter the activities shortcode html', 'weop' ); ?></li>
+		<li>weop_jobs_query - <?php esc_html_e( 'Filter to alter the jobs shortcode query', 'weop' ); ?></li>
+		<li>weop_jobs_html - <?php esc_html_e( 'Filter to alter the jobs shortcode html', 'weop' ); ?></li>
+		<li>weop_education_query - <?php esc_html_e( 'Filter to alter the education shortcode query', 'weop' ); ?></li>
+		<li>weop_education_html - <?php esc_html_e( 'Filter to alter the education shortcode html', 'weop' ); ?></li>
+		<li>weop_projects_query - <?php esc_html_e( 'Filter to alter the projects shortcode query', 'weop' ); ?></li>
+		<li>weop_projects_html - <?php esc_html_e( 'Filter to alter the projects shortcode html', 'weop' ); ?></li>
+	</ul>
+	<h2><?php esc_html_e( 'Actions', 'weop' ); ?></h2>
+	<ul>
+		<li>weop_activities_before - <?php esc_html_e( 'Action before the activities shortcode', 'weop' ); ?></li>
+		<li>weop_activities_after - <?php esc_html_e( 'Action after the activities shortcode', 'weop' ); ?></li>
+		<li>weop_education_before - <?php esc_html_e( 'Action before the education shortcode', 'weop' ); ?></li>
+		<li>weop_education_after - <?php esc_html_e( 'Action after the education shortcode', 'weop' ); ?></li>
+		<li>weop_jobs_before - <?php esc_html_e( 'Action before the jobs shortcode', 'weop' ); ?></li>
+		<li>weop_jobs_after - <?php esc_html_e( 'Action after the jobs shortcode', 'weop' ); ?></li>
+		<li>weop_projects_before - <?php esc_html_e( 'Action before the projects shortcode', 'weop' ); ?></li>
+		<li>weop_projects_after - <?php esc_html_e( 'Action after the projects shortcode', 'weop' ); ?></li>
+	</ul>
 </div>
 
 			<?php
@@ -435,9 +451,11 @@ if( is_a( $shortcode_handler, 'weop_Shortcodes' ) {
 	}
 
 	$weop = new WEOP_Plugin();
-	new Classes\Jobs();
-	new Classes\Education();
 	new Classes\Comments( $weop );
 	new Classes\DisableFS( $weop );
+	new Classes\Activities();
+	new Classes\Education();
+	new Classes\Jobs();
+	new Classes\Projects();
 
 }
