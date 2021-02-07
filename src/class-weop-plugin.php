@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.8
+ * Version:     0.1.9
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.4';
+		const PLUGIN_VERSION = '0.1.9';
 
 		/**
 		 * Plugin name
@@ -133,7 +133,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		public function enqueue() {
 
 			wp_enqueue_style( 'weop_css', plugin_dir_url( __FILE__ ) . 'dist/css/style.min.css', array(), '0.1.0' );
-			wp_enqueue_script( 'weop_js', plugin_dir_url( __FILE__ ) . 'dist/js/script.min.js', array(), '0.1.0', true );
+			// wp_enqueue_script( 'weop_js', plugin_dir_url( __FILE__ ) . 'dist/js/script.min.js', array(), '0.1.0', true );
 		}
 
 		/**
@@ -151,14 +151,18 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 */
 		public function menu_settings() {
 
+			$options      = $this->get_options();
+			$menu_postion = $options['menu_position'];
+			$menu_icon    = $options['menu_icon'];
+
 			add_menu_page(
 				__( 'Wedepohl Options', 'weop' ),
 				__( 'Wed Eng Options', 'weop' ),
 				'manage_options',
 				$this->plugin_name,
 				array( $this, 'display_settings' ),
-				'dashicons-admin-generic',
-				4
+				$menu_icon,
+				$menu_postion
 			);
 
 			add_submenu_page(
@@ -268,7 +272,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		<?php
 			$html = sprintf(
 				'<strong>%s</strong> %s',
-				esc_html__( 'Enable Comments:', 'weop' ),
+				esc_html__( 'Disable Comments:', 'weop' ),
 				esc_html__( 'Enable/Disable comments in the admin menus', 'weop' )
 			);
 		?>
@@ -327,9 +331,11 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			$options = shortcode_atts(
 				array(
-					'analytics'  => '',
-					'comments'   => '',
-					'disable_fs' => '',
+					'analytics'     => '',
+					'comments'      => '',
+					'disable_fs'    => '',
+					'menu_position' => 4,                        // Default in between Dashboard and Posts.
+					'menu_icon'     => 'dashicons-admin-generic', // Default gear.
 				),
 				$options
 			);
@@ -356,6 +362,229 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			$settings = new Settings();
 
+			// Create menu position options array.
+			$select_options = array();
+			for ( $i = 0; $i <= 200; $i++ ) {
+				$select_options[$i] = $i;
+			}
+			// Fill in WordPress predefined menu positions.
+			$select_options[2]  = '2 - Dashboard';
+			$select_options[4]  = '4 - Separator';
+			$select_options[5]  = '5 - Posts';
+			$select_options[10] = '10 - Media';
+			$select_options[15] = '15 - Links';
+			$select_options[20] = '20 - Pages';
+			$select_options[25] = '25 - Comments';
+			$select_options[59] = '59 - Separator';
+			$select_options[60] = '60 - Appearance';
+			$select_options[65] = '65 - Plugins';
+			$select_options[70] = '70 - Users';
+			$select_options[75] = '75 - Tools';
+			$select_options[80] = '80 - Settings';
+			$select_options[99] = '99 - Separator';
+
+			add_settings_field(
+				'menu_position',
+				__( 'Menu Position:', 'weop' ),
+				array( $settings, 'display_select_field' ),
+				$this->plugin_name,
+				'options_section',
+				array(
+					'label-classes' => 'input-label',
+					'label-text'    => __( 'Select menu position for plugin menu', 'weop' ),
+					'classes'       => 'regular-text',
+					'options'       => $select_options,
+					'value'         => isset( $options['menu_position'] ) ? $options['menu_position'] : '',
+					'name'          => "{$this->options_name}[menu_position]",
+					'id'            => "{$this->options_name}[menu_position]",
+				)
+			);
+
+			$dashicons = array(
+				'menu',
+				'admin-site',
+				'dashboard',
+				'admin-post',
+				'admin-media',
+				'admin-links',
+				'admin-page',
+				'admin-comments',
+				'admin-appearance',
+				'admin-plugins',
+				'admin-users',
+				'admin-tools',
+				'admin-settings',
+				'admin-network',
+				'admin-home',
+				'admin-generic',
+				'admin-collapse',
+				'welcome-write-blog',
+				'welcome-add-page',
+				'welcome-view-site',
+				'welcome-widgets-menus',
+				'welcome-comments',
+				'welcome-learn-more',
+				'format-aside',
+				'format-image',
+				'format-gallery',
+				'format-video',
+				'format-status',
+				'format-quote',
+				'format-chat',
+				'format-audio',
+				'camera',
+				'images-alt',
+				'images-alt2',
+				'video-alt',
+				'video-alt2',
+				'video-alt3',
+				'image-crop',
+				'image-rotate-left',
+				'image-rotate-right',
+				'image-flip-vertical',
+				'image-flip-horizontal',
+				'undo',
+				'redo',
+				'editor-bold',
+				'editor-italic',
+				'editor-ul',
+				'editor-ol',
+				'editor-quote',
+				'editor-alignleft',
+				'editor-aligncenter',
+				'editor-alignright',
+				'editor-insertmore',
+				'editor-spellcheck',
+				'editor-distractionfree',
+				'editor-kitchensink',
+				'editor-underline',
+				'editor-justify',
+				'editor-textcolor',
+				'editor-paste-word',
+				'editor-paste-text',
+				'editor-removeformatting',
+				'editor-video',
+				'editor-customchar',
+				'editor-outdent',
+				'editor-indent',
+				'editor-help',
+				'editor-strikethrough',
+				'editor-unlink',
+				'editor-rtl',
+				'align-left',
+				'align-right',
+				'align-center',
+				'align-none',
+				'lock',
+				'calendar',
+				'visibility',
+				'post-status',
+				'edit',
+				'trash',
+				'arrow-up',
+				'arrow-down',
+				'arrow-right',
+				'arrow-left',
+				'arrow-up-alt',
+				'arrow-down-alt',
+				'arrow-right-alt',
+				'arrow-left-alt',
+				'arrow-up-alt2',
+				'arrow-down-alt2',
+				'arrow-right-alt2',
+				'arrow-left-alt2',
+				'sort',
+				'leftright',
+				'list-view',
+				'exerpt-view',
+				'share',
+				'share-alt',
+				'share-alt2',
+				'twitter',
+				'rss',
+				'facebook',
+				'facebook-alt',
+				'googleplus',
+				'networking',
+				'hammer',
+				'art',
+				'migrate',
+				'performance',
+				'wordpress',
+				'wordpress-alt',
+				'pressthis',
+				'update',
+				'screenoptions',
+				'info',
+				'cart',
+				'feedback',
+				'cloud',
+				'translation',
+				'tag',
+				'category',
+				'yes',
+				'no',
+				'no-alt',
+				'plus',
+				'minus',
+				'dismiss',
+				'marker',
+				'star-filled',
+				'star-half',
+				'star-empty',
+				'flag',
+				'location',
+				'location-alt',
+				'vault',
+				'shield',
+				'shield-alt',
+				'search',
+				'slides',
+				'analytics',
+				'chart-pie',
+				'chart-bar',
+				'chart-line',
+				'chart-area',
+				'groups',
+				'businessman',
+				'id',
+				'id-alt',
+				'products',
+				'awards',
+				'forms',
+				'portfolio',
+				'book',
+				'book-alt',
+				'download',
+				'upload',
+				'backup',
+				'lightbulb',
+				'smiley',
+			);
+
+			$select_options = array();
+			foreach ($dashicons as $icon) {
+				$iconstr                  = 'dashicons-' . $icon;
+				$select_options[$iconstr] = $icon;
+			}
+
+			$icon = isset( $options['menu_icon'] ) ? $options['menu_icon'] : '';
+			add_settings_field(
+				'menu_icon',
+				__( 'Menu Icon:', 'weop' ),
+				array( $settings, 'display_select_field' ),
+				$this->plugin_name,
+				'options_section',
+				array(
+					'label-classes' => 'content-icon dashicons ' . $icon,
+					'classes'       => 'regular-text select-icon',
+					'options'       => $select_options,
+					'value'         => $icon,
+					'name'          => "{$this->options_name}[menu_icon]",
+					'id'            => "{$this->options_name}[menu_icon]",
+				)
+			);
+
 			add_settings_field(
 				'analytics',
 				__( 'Google Analytics Code:', 'weop' ),
@@ -374,12 +603,12 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			add_settings_field(
 				'comments',
-				__( 'Enable Comments:', 'weop' ),
+				__( 'Disable Comments:', 'weop' ),
 				array( $settings, 'display_checkbox_field' ),
 				$this->plugin_name,
 				'options_section',
 				array(
-					'label-text' => __( 'Enable comments on website', 'weop' ),
+					'label-text' => __( 'Disable comments on website', 'weop' ),
 					'value'      => $options['comments'],
 					'name'       => "{$this->options_name}[comments]",
 					'id'         => "{$this->options_name}[comments]",

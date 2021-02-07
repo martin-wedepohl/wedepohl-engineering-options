@@ -52,7 +52,7 @@ if ( ! class_exists( 'Comments' ) ) {
 		public function disable_comments_admin_menu() {
 
 			$options = $this->main_plugin->get_options();
-			if ( '1' !== $options['comments'] ) {
+			if ( '1' === $options['comments'] ) {
 				remove_menu_page( 'edit-comments.php' );
 				remove_submenu_page( 'options-general.php', 'options-discussion.php' );
 			}
@@ -69,7 +69,7 @@ if ( ! class_exists( 'Comments' ) ) {
 			global $pagenow;
 
 			$options = $this->main_plugin->get_options();
-			if ( '1' !== $options['comments'] ) {
+			if ( '1' === $options['comments'] ) {
 				if ( 'edit-comments.php' === $pagenow ) {
 					wp_safe_redirect( admin_url() );
 					exit;
@@ -84,7 +84,7 @@ if ( ! class_exists( 'Comments' ) ) {
 		public function disable_comments_dashboard() {
 
 			$options = $this->main_plugin->get_options();
-			if ( '1' !== $options['comments'] ) {
+			if ( '1' === $options['comments'] ) {
 				remove_meta_box( 'dashboard_recent_comments', 'dashboard', 'normal' );
 			}
 
@@ -96,7 +96,7 @@ if ( ! class_exists( 'Comments' ) ) {
 		public function disable_comments_admin_bar() {
 
 			$options = $this->main_plugin->get_options();
-			if ( '1' !== $options['comments'] ) {
+			if ( '1' === $options['comments'] ) {
 				if ( is_admin_bar_showing() ) {
 					remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu', 60 );
 				}

@@ -39,6 +39,36 @@ class Settings {
 	}
 
 	/**
+	 * Display a select field
+	 *
+	 * @param array $args The arguments.
+	 */
+	public function display_select_field( $args ) {
+
+		$label_classes = isset( $args['label-classes'] ) ? ' class="' . $args['label-classes'] . '" ' : '';
+		$label_text    = isset( $args['label-text'] ) ? $args['label-text'] : '';
+		$classes       = isset( $args['classes'] ) ? ' class="' . $args['classes'] . '" ' : '';
+		$options       = isset( $args['options'] ) ? $args['options'] : array();
+		$value         = isset( $args['value'] ) ? $args['value'] : '';
+		$name          = isset( $args['name'] ) ? ' name="' . $args['name'] . '" ' : '';
+		$id            = isset( $args['id'] ) ? ' id="' . $args['id'] . '" ' : '';
+
+		?>
+		<select <?php echo wp_kses( $classes . $name . $id, wp_kses_allowed_html( 'data' ) ); ?>>
+		<?php
+		foreach ( $options as $opt_value => $text ) {
+			$selected = $opt_value == $value ? 'selected' : '';
+		?>
+			<option value="<?php echo $opt_value; ?>" <?php echo $selected; ?>><?php echo $text; ?></option>
+		<?php } ?>
+		</select>
+		<br>
+		<span <?php echo wp_kses( $label_classes, wp_kses_allowed_html( 'data' ) ); ?>><?php echo wp_kses( $label_text, wp_kses_allowed_html( 'data' ) ); ?></span>
+		<?php
+
+	}
+
+	/**
 	 * Display a text input field
 	 *
 	 * @param array $args The arguments.
