@@ -54,6 +54,11 @@ const copyIndex = () => {
         .pipe(dest(distBase + "/dist"))
         .pipe(dest(distBase + "/dist/css"))
         .pipe(dest(distBase + "/dist/js"))
+        .pipe(dest(distBase + "/Classes"))
+        .pipe(dest(distBase + "/includes"))
+        .pipe(dest(distBase + "/includes/templates"))
+        .pipe(dest(distBase + "/vendor"))
+        .pipe(dest(distBase + "/vendor/composer"))
 }
 
 // css task
