@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.7
+ * Version:     0.1.8
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
