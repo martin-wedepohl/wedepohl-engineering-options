@@ -383,7 +383,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 		/**
 		 * Shortcode to return all the jobs passing in an optional date format
 		 *
-		 * [weop_get_jobs date_format="F Y"]
+		 * [weop_jobs date_format="F Y"]
 		 *
 		 * @param array $atts Array of shortcode attributes.
 		 *
@@ -410,7 +410,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 				),
 				'orderby'        => array(
 					'job_end'   => 'DESC',
-					'job_start' => 'ASC',
+					'job_start' => 'DESC',
 				),
 			);
 

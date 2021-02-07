@@ -344,7 +344,7 @@ if ( ! class_exists( 'Activities' ) ) {
 				),
 				'orderby'        => array(
 					'end'   => 'DESC',
-					'start' => 'ASC',
+					'start' => 'DESC',
 				),
 			);
 
