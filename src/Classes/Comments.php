@@ -22,13 +22,6 @@ if ( ! class_exists( 'Comments' ) ) {
 	 * Enable or disable comments.
 	 */
 	class Comments {
-		/**
-		 * Get Options callback
-		 *
-		 * @var $main_plugin Callback function to get the plugin options
-		 * @access private
-		 */
-		private $main_plugin = null;
 
 		/**
 		 * Class constructor.
@@ -36,13 +29,17 @@ if ( ! class_exists( 'Comments' ) ) {
 		 * @param function $plugin Callback to get the plugin options.
 		 */
 		public function __construct( $plugin ) {
-			$this->main_plugin = $plugin;
 
-			// Disable comments, pings and remove the comments from the admin menu.
-			add_action( 'admin_menu', array( $this, 'disable_comments_admin_menu' ) );
-			add_action( 'admin_init', array( $this, 'comments_admin_menu_redirect' ) );
-			add_action( 'admin_init', array( $this, 'disable_comments_dashboard' ) );
-			add_action( 'admin_init', array( $this, 'disable_comments_admin_bar' ) );
+			$options = $plugin->get_options();
+
+			if  ( '1' === $options['comments'] ) {
+				// Disable comments, pings and remove the comments from the admin menu.
+				add_action( 'admin_menu', array( $this, 'disable_comments_admin_menu' ) );
+				add_action( 'admin_init', array( $this, 'comments_admin_menu_redirect' ) );
+				add_action( 'admin_init', array( $this, 'disable_comments_dashboard' ) );
+				add_action( 'admin_init', array( $this, 'disable_comments_admin_bar' ) );
+				add_action( 'enqueue_block_editor_assets', array( $this, 'remove_block_discussions' ) );
+			}
 
 		}
 
@@ -51,11 +48,8 @@ if ( ! class_exists( 'Comments' ) ) {
 		 */
 		public function disable_comments_admin_menu() {
 
-			$options = $this->main_plugin->get_options();
-			if ( '1' === $options['comments'] ) {
-				remove_menu_page( 'edit-comments.php' );
-				remove_submenu_page( 'options-general.php', 'options-discussion.php' );
-			}
+			remove_menu_page( 'edit-comments.php' );
+			remove_submenu_page( 'options-general.php', 'options-discussion.php' );
 
 		}
 
@@ -68,12 +62,9 @@ if ( ! class_exists( 'Comments' ) ) {
 
 			global $pagenow;
 
-			$options = $this->main_plugin->get_options();
-			if ( '1' === $options['comments'] ) {
-				if ( 'edit-comments.php' === $pagenow ) {
-					wp_safe_redirect( admin_url() );
-					exit;
-				}
+			if ( 'edit-comments.php' === $pagenow ) {
+				wp_safe_redirect( admin_url() );
+				exit;
 			}
 
 		}
@@ -83,10 +74,7 @@ if ( ! class_exists( 'Comments' ) ) {
 		 */
 		public function disable_comments_dashboard() {
 
-			$options = $this->main_plugin->get_options();
-			if ( '1' === $options['comments'] ) {
-				remove_meta_box( 'dashboard_recent_comments', 'dashboard', 'normal' );
-			}
+			remove_meta_box( 'dashboard_recent_comments', 'dashboard', 'normal' );
 
 		}
 
@@ -95,12 +83,19 @@ if ( ! class_exists( 'Comments' ) ) {
 		 */
 		public function disable_comments_admin_bar() {
 
-			$options = $this->main_plugin->get_options();
-			if ( '1' === $options['comments'] ) {
-				if ( is_admin_bar_showing() ) {
-					remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu', 60 );
-				}
+			if ( is_admin_bar_showing() ) {
+				remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu', 60 );
 			}
+
+		}
+
+		/**
+		 * Remove the discussion meta box in block editor
+		 */
+		public function remove_block_discussions() {
+
+			$script = "wp.domReady( () => { const { removeEditorPanel } = wp.data.dispatch('core/edit-post'); removeEditorPanel( 'discussion-panel' ); } );";
+			wp_add_inline_script( 'wp-blocks', $script );
 
 		}
 
