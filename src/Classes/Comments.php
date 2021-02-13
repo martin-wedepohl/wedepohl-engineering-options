@@ -38,7 +38,10 @@ if ( ! class_exists( 'Comments' ) ) {
 				add_action( 'admin_init', array( $this, 'comments_admin_menu_redirect' ) );
 				add_action( 'admin_init', array( $this, 'disable_comments_dashboard' ) );
 				add_action( 'admin_init', array( $this, 'disable_comments_admin_bar' ) );
-				add_action( 'enqueue_block_editor_assets', array( $this, 'remove_block_discussions' ) );
+
+				if ( version_compare( $wp_version, '5.0', '>=' ) ) {
+					add_action( 'enqueue_block_editor_assets', array( $this, 'remove_block_discussions' ) );
+				}
 			}
 
 		}
@@ -50,6 +53,10 @@ if ( ! class_exists( 'Comments' ) ) {
 
 			remove_menu_page( 'edit-comments.php' );
 			remove_submenu_page( 'options-general.php', 'options-discussion.php' );
+			remove_meta_box( 'commentstatusdiv', 'post', 'normal' );
+			remove_meta_box( 'commentstatusdiv', 'page', 'normal' );
+			remove_meta_box( 'commentsdiv', 'post', 'normal' );
+			remove_meta_box( 'commentsdiv', 'page', 'normal' );
 
 		}
 
