@@ -131,10 +131,10 @@ if ( ! class_exists( 'Jobs' ) ) {
 				'show_in_nav_menus'    => true,
 				'show_in_admin_bar'    => true,
 				'menu_position'        => 5,
-				'can_export'           => true,
-				'has_archive'          => true,
-				'exclude_from_search'  => false,
-				'publicly_queryable'   => true,
+				'can_export'           => false,
+				'has_archive'          => false,
+				'exclude_from_search'  => true,
+				'publicly_queryable'   => false,
 				'capability_type'      => 'post',
 				'show_in_rest'         => true,
 				'register_meta_box_cb' => array( $this, 'register_meta_box' ),
@@ -361,7 +361,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 			}
 
 			$meta_key_array = self::get_meta_key();
-			$orderby        = $query->get( 'orderby');
+			$orderby        = $query->get( 'orderby' );
 
 			switch ( $orderby ) {
 				case 'start':
@@ -428,8 +428,8 @@ if ( ! class_exists( 'Jobs' ) ) {
 			if ( $loop->have_posts() ) {
 				while ( $loop->have_posts() ) {
 					$loop->the_post();
-					$post  = $loop->post;
-					$data  = self::get_data( $post->ID );
+					$post = $loop->post;
+					$data = self::get_data( $post->ID );
 
 					do_action( 'weop_jobs_before' );
 					$html .= '<div class="job" id="job-' . $post->ID . '">';
@@ -448,7 +448,7 @@ if ( ! class_exists( 'Jobs' ) ) {
 					}
 					$html .= '<span class="job-date">' . $start . ' to ' . $end . '</span>';
 					$html .= '<span class="job-content">' . get_the_content( $post->ID ) . '</span>';
-					$html .= '<hr class="job-divider">';
+					$html .= '<div class="job-divider"></div>';
 					$html .= '</div>';
 					do_action( 'weop_jobs_after' );
 				}

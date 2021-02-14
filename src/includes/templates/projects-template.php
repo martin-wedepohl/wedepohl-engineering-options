@@ -5,8 +5,8 @@
 
 	<h1><?php the_title(); ?></h1>
 
-	<section id="additional-seminars" class="seminars-section">
-		<?php echo do_shortcode( '[weop_education show_seminars="true"]' ); ?>
+	<section id="projects" class="projects-section">
+		<?php echo do_shortcode( '[weop_projects]' ); ?>
 	</section>
 
 </article>

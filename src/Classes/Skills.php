@@ -44,11 +44,6 @@ if ( ! class_exists( 'Skills' ) ) {
 		 */
 		public function __construct() {
 			add_action( 'init', array( $this, 'register' ) );
-			// add_action( 'save_post', array( $this, 'save_meta' ), 1, 2 );
-			// add_filter( 'manage_edit-' . self::POST_TYPE . '_columns', array( $this, 'table_head' ) );
-			// add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
-			// add_filter( 'manage_edit-' . self::POST_TYPE . '_sortable_columns', array( $this, 'table_sort' ) );
-			// add_action( 'pre_get_posts', array( $this, 'custom_orderby' ) );
 			add_shortcode( 'weop_skills', array( $this, 'get_skills' ) );
 		}
 
@@ -73,23 +68,23 @@ if ( ! class_exists( 'Skills' ) ) {
 			);
 
 			$args = array(
-				'label'                => __( 'skill', 'weop' ),
-				'description'          => __( 'Skills', 'weop' ),
-				'labels'               => $labels,
-				'supports'             => array( 'title', 'editor' ),
-				'hierarchical'         => false,
-				'public'               => true,
-				'show_ui'              => true,
-				'show_in_menu'         => WEOP_Plugin::PLUGIN_NAME,
-				'show_in_nav_menus'    => true,
-				'show_in_admin_bar'    => true,
-				'menu_position'        => 5,
-				'can_export'           => true,
-				'has_archive'          => true,
-				'exclude_from_search'  => false,
-				'publicly_queryable'   => true,
-				'capability_type'      => 'post',
-				'show_in_rest'         => true,
+				'label'               => __( 'skill', 'weop' ),
+				'description'         => __( 'Skills', 'weop' ),
+				'labels'              => $labels,
+				'supports'            => array( 'title', 'editor' ),
+				'hierarchical'        => false,
+				'public'              => true,
+				'show_ui'             => true,
+				'show_in_menu'        => WEOP_Plugin::PLUGIN_NAME,
+				'show_in_nav_menus'   => true,
+				'show_in_admin_bar'   => true,
+				'menu_position'       => 5,
+				'can_export'          => false,
+				'has_archive'         => false,
+				'exclude_from_search' => true,
+				'publicly_queryable'  => false,
+				'capability_type'     => 'post',
+				'show_in_rest'        => true,
 
 			);
 
@@ -102,13 +97,9 @@ if ( ! class_exists( 'Skills' ) ) {
 		 *
 		 * [weop_skills]
 		 *
-		 * @param array $atts Array of shortcode attributes.
-		 *
 		 * @return string The HTML string of all the skills
 		 */
-		public function get_skills( $atts ) : string {
-
-			// $meta_key_array = self::get_meta_key();
+		public function get_skills() : string {
 
 			$args = array(
 				'post_type'      => self::POST_TYPE,
@@ -119,23 +110,16 @@ if ( ! class_exists( 'Skills' ) ) {
 
 			$loop = new \WP_Query( apply_filters( 'weop_skills_query', $args ) );
 
-			$atts = shortcode_atts(
-				array(
-					'date_format' => 'F Y',
-				),
-				$atts,
-				'get_skills'
-			);
-
 			$html = '';
 			if ( $loop->have_posts() ) {
 				while ( $loop->have_posts() ) {
 					$loop->the_post();
-					$post  = $loop->post;
+					$post = $loop->post;
 
 					do_action( 'weop_skills_before' );
 					$html .= '<div class="skill" id="skill-' . $post->ID . '">';
 					$html .= '<span class="skill-content">' . get_the_content( $post->ID ) . '</span>';
+					$html .= '<div class="skill-divider"></div>';
 					$html .= '</div>';
 					do_action( 'weop_skills_after' );
 				}

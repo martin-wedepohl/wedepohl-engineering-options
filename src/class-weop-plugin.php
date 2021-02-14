@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.13
+ * Version:     0.1.14
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.13';
+		const PLUGIN_VERSION = '0.1.14';
 
 		/**
 		 * Plugin name
@@ -89,7 +89,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			register_deactivation_hook( __FILE__, array( $this, 'deactivation' ) );
 			register_uninstall_hook( __FILE__, array( 'WEOP_Plugin', 'weop_uninstall' ) );
 
-			// Setup enqueue actions
+			// Setup enqueue actions.
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin' ) );
 
@@ -132,8 +132,14 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 */
 		public function enqueue() {
 
-			wp_enqueue_style( 'weop_css', plugin_dir_url( __FILE__ ) . 'dist/css/style.min.css', array(), '0.1.0' );
-			// wp_enqueue_script( 'weop_js', plugin_dir_url( __FILE__ ) . 'dist/js/script.min.js', array(), '0.1.0', true );
+			global $template;
+
+			$basename = basename( $template );
+
+			if ( 'resume-template.php' === $basename || 'seminars-template.php' === $basename ) {
+				wp_enqueue_style( 'weop_style', plugin_dir_url( __FILE__ ) . 'dist/css/style.min.css', array(), self::PLUGIN_VERSION );
+			}
+
 		}
 
 		/**
@@ -141,8 +147,8 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 */
 		public function enqueue_admin() {
 
-			wp_enqueue_style( 'weop_admin_css', plugin_dir_url( __FILE__ ) . 'dist/css/style-admin.min.css', array(), '0.1.0' );
-			wp_enqueue_script( 'weop_admin_js', plugin_dir_url( __FILE__ ) . 'dist/js/script-admin.min.js', array(), '0.1.0', true );
+			wp_enqueue_style( 'weop_admin', plugin_dir_url( __FILE__ ) . 'dist/css/style-admin.min.css', array(), self::PLUGIN_VERSION );
+			wp_enqueue_script( 'weop_admin', plugin_dir_url( __FILE__ ) . 'dist/js/script-admin.min.js', array(), self::PLUGIN_VERSION, true );
 
 		}
 
@@ -219,16 +225,16 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 */
 		public function add_analytics_in_header() {
 
-			$options        = get_option( $this->options_name );
-			$analytics_code = is_array( $options ) ? ( isset( $options['analytics'] ) ? $options['analytics'] : '' ) : '';
-			if ( '' !== $analytics_code ) {
-				?>
-				<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr( $analytics_code ); ?>"></script>
-					<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag("js", new Date());gtag("config","<?php echo esc_attr( $analytics_code ); ?>");
-				</script>
-				<?php
-			}
-
+				$options        = get_option( $this->options_name );
+				$analytics_code = is_array( $options ) ? ( isset( $options['analytics'] ) ? $options['analytics'] : '' ) : '';
+				if ( '' !== $analytics_code ) {
+					?>
+					<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr( $analytics_code ); ?>"></script>
+						<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag("js", new Date());gtag("config","<?php echo esc_attr( $analytics_code ); ?>");
+					</script>
+					<?php
+				}
+				
 		}
 
 		/**
@@ -579,9 +585,9 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			);
 
 			$select_options = array();
-			foreach ($dashicons as $icon) {
-				$iconstr                  = 'dashicons-' . $icon;
-				$select_options[$iconstr] = $icon;
+			foreach ( $dashicons as $icon ) {
+				$iconstr                    = 'dashicons-' . $icon;
+				$select_options[ $iconstr ] = $icon;
 			}
 
 			$icon = isset( $options['menu_icon'] ) ? $options['menu_icon'] : '';
@@ -677,6 +683,34 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 */
 		public function load_page_template( $template ) : string {
 
+			if ( is_page( 'plugins' ) ) {
+				$file        = 'templates/plugins-template.php';
+				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
+				$plugin_file = $plugin_dir . $file;
+				$theme_dir   = get_stylesheet_directory() . '/plugins/wedepohl-engineering-options/';
+				$theme_file  = $theme_dir . $file;
+
+				if ( file_exists( $theme_file ) ) {
+					return $theme_file;
+				} elseif ( file_exists( $plugin_file ) ) {
+					return $plugin_file;
+				}
+			}
+
+			if ( is_page( 'projects' ) ) {
+				$file        = 'templates/projects-template.php';
+				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
+				$plugin_file = $plugin_dir . $file;
+				$theme_dir   = get_stylesheet_directory() . '/plugins/wedepohl-engineering-options/';
+				$theme_file  = $theme_dir . $file;
+
+				if ( file_exists( $theme_file ) ) {
+					return $theme_file;
+				} elseif ( file_exists( $plugin_file ) ) {
+					return $plugin_file;
+				}
+			}
+
 			if ( is_page( 'resume' ) ) {
 				$file        = 'templates/resume-template.php';
 				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
@@ -717,6 +751,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 	new Classes\Activities();
 	new Classes\Education();
 	new Classes\Jobs();
+	new Classes\Plugins();
 	new Classes\Projects();
 	new Classes\Skills();
 

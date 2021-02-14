@@ -1,11 +1,11 @@
 <?php
 /**
- * Projects custom post type
+ * Plugins custom post type
  *
  * PHP Version 7
  *
  * @category WEOP
- * @package  Projects
+ * @package  Plugins
  * @author   Martin Wedepohl <martin@wedepohlengineering.com>
  * @license  GPL3 or later
  */
@@ -19,16 +19,16 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 defined( 'ABSPATH' ) || die( '' );
 
-if ( ! class_exists( 'Projects' ) ) {
+if ( ! class_exists( 'Plugins' ) ) {
 
 	/**
 	 * Projects custom post type
 	 */
-	class Projects {
+	class Plugins {
 
-		const POST_TYPE      = 'projects';
-		const META_BOX_DATA  = 'weop_projects_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_projects_meta_box_nonce';
+		const POST_TYPE      = 'plugins';
+		const META_BOX_DATA  = 'weop_plugins_save_meta_box_data';
+		const META_BOX_NONCE = 'weo_plugins_meta_box_nonce';
 
 		/**
 		 * Return the meta key
@@ -37,7 +37,8 @@ if ( ! class_exists( 'Projects' ) ) {
 		 */
 		public static function get_meta_key() : array {
 			return array(
-				'project_url' => '_meta_project_url',
+				'plugin_url' => '_meta_plugin_url',
+				'github_url' => '_meta_github_url',
 			);
 		}
 
@@ -63,11 +64,13 @@ if ( ! class_exists( 'Projects' ) ) {
 
 			$meta_key_array = self::get_meta_key();
 
-			$project_url = get_post_meta( $post_id, $meta_key_array['project_url'], true );
+			$plugin_url = get_post_meta( $post_id, $meta_key_array['plugin_url'], true );
+			$github_url = get_post_meta( $post_id, $meta_key_array['github_url'], true );
 
 			$data = array(
-				'project'     => get_the_title( $post_id ),
-				'project_url' => esc_url( $project_url ),
+				'plugin'     => get_the_title( $post_id ),
+				'plugin_url' => esc_url( $plugin_url ),
+				'github_url' => esc_url( $github_url ),
 			);
 
 			return $data;
@@ -81,7 +84,7 @@ if ( ! class_exists( 'Projects' ) ) {
 			add_action( 'save_post', array( $this, 'save_meta' ), 1, 2 );
 			add_filter( 'manage_edit-' . self::POST_TYPE . '_columns', array( $this, 'table_head' ) );
 			add_action( 'manage_' . self::POST_TYPE . '_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
-			add_shortcode( 'weop_projects', array( $this, 'get_projects' ) );
+			add_shortcode( 'weop_plugins', array( $this, 'get_plugins' ) );
 		}
 
 		/**
@@ -89,24 +92,24 @@ if ( ! class_exists( 'Projects' ) ) {
 		 */
 		public function register() {
 			$labels = array(
-				'name'               => __( 'Projects', 'weop' ),
-				'singular_name'      => __( 'Project', 'weop' ),
-				'menu_name'          => __( 'Projects', 'weop' ),
-				'parent_item_colon'  => __( 'Parent Project', 'weop' ),
-				'all_items'          => __( 'All Projects', 'weop' ),
-				'view_item'          => __( 'View Project', 'weop' ),
-				'add_new_item'       => __( 'Add New Project', 'weop' ),
+				'name'               => __( 'Plugins', 'weop' ),
+				'singular_name'      => __( 'Plugin', 'weop' ),
+				'menu_name'          => __( 'Plugins', 'weop' ),
+				'parent_item_colon'  => __( 'Parent Plugin', 'weop' ),
+				'all_items'          => __( 'All Plugins', 'weop' ),
+				'view_item'          => __( 'View Plugin', 'weop' ),
+				'add_new_item'       => __( 'Add New Plugin', 'weop' ),
 				'add_new'            => __( 'Add New', 'weop' ),
-				'edit_item'          => __( 'Edit Project', 'weop' ),
-				'update_item'        => __( 'Update Project', 'weop' ),
-				'search_items'       => __( 'Search Projects', 'weop' ),
-				'not_found'          => __( 'Project Not Found', 'weop' ),
-				'not_found_in_trash' => __( 'Project Not Found in Trash', 'weop' ),
+				'edit_item'          => __( 'Edit Plugin', 'weop' ),
+				'update_item'        => __( 'Update Plugin', 'weop' ),
+				'search_items'       => __( 'Search Plugins', 'weop' ),
+				'not_found'          => __( 'Plugin Not Found', 'weop' ),
+				'not_found_in_trash' => __( 'Plugin Not Found in Trash', 'weop' ),
 			);
 
 			$args = array(
-				'label'                => __( 'projects', 'weop' ),
-				'description'          => __( 'Projects', 'weop' ),
+				'label'                => __( 'plugins', 'weop' ),
+				'description'          => __( 'Plugins', 'weop' ),
 				'labels'               => $labels,
 				'supports'             => array( 'title', 'editor', 'thumbnail' ),
 				'hierarchical'         => false,
@@ -136,7 +139,7 @@ if ( ! class_exists( 'Projects' ) ) {
 		public function register_meta_box() {
 			add_meta_box(
 				'information_section',
-				__( 'Project Information', 'weop' ),
+				__( 'Plugin Information', 'weop' ),
 				array( $this, 'meta_box' ),
 				self::POST_TYPE,
 				'side',
@@ -161,11 +164,21 @@ if ( ! class_exists( 'Projects' ) ) {
 
 			$args = array(
 				'label-classes' => 'input-label',
-				'label-text'    => __( 'Project URL', 'weop' ),
+				'label-text'    => __( 'Plugin URL', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => isset( $data['project_url'] ) ? $data['project_url'] : '',
-				'name'          => 'project_url',
-				'id'            => 'project_url',
+				'value'         => isset( $data['plugin_url'] ) ? $data['plugin_url'] : '',
+				'name'          => 'plugin_url',
+				'id'            => 'plugin_url',
+			);
+			$settings->display_text_field( $args );
+
+			$args = array(
+				'label-classes' => 'input-label',
+				'label-text'    => __( 'GitHub URL', 'weop' ),
+				'classes'       => 'width-100',
+				'value'         => isset( $data['github_url'] ) ? $data['github_url'] : '',
+				'name'          => 'github_url',
+				'id'            => 'github_url',
 			);
 			$settings->display_text_field( $args );
 
@@ -189,8 +202,10 @@ if ( ! class_exists( 'Projects' ) ) {
 			}
 			// Now that we're authenticated, time to save the data.
 			$meta_key_array = self::get_meta_key();
-			$data           = esc_url_raw( $_POST['project_url'], array( 'http', 'https' ) );
-			update_post_meta( $post_id, $meta_key_array['project_url'], $data );
+			$data           = esc_url_raw( $_POST['plugin_url'], array( 'http', 'https' ) );
+			update_post_meta( $post_id, $meta_key_array['plugin_url'], $data );
+			$data           = esc_url_raw( $_POST['github_url'], array( 'http', 'https' ) );
+			update_post_meta( $post_id, $meta_key_array['github_url'], $data );
 		}
 
 		/**
@@ -205,7 +220,7 @@ if ( ! class_exists( 'Projects' ) ) {
 			// Want the selection box and title (name for our custom post type) first.
 			$newcols['cb'] = $columns['cb'];
 			unset( $columns['cb'] );
-			$newcols['title'] = 'Project';
+			$newcols['title'] = 'Plugin';
 			unset( $columns['title'] );
 			// Want date last.
 			unset( $columns['date'] );
@@ -228,13 +243,13 @@ if ( ! class_exists( 'Projects' ) ) {
 			$data = self::get_data( $post_id );
 
 			if ( 'title' === $column_name ) {
-				if ( isset( $data['project_url'] ) ) {
-					echo '<a href="' . esc_url( $data['project_url'] ) .
+				if ( isset( $data['plugin_url'] ) ) {
+					echo '<a href="' . esc_url( $data['plugin_url'] ) .
 					'" target="_blank" title="Go To ' .
-					esc_attr( $data['project'] ) . '">' .
-					esc_attr( $data['project'] ) . '</a>';
+					esc_attr( $data['plugin'] ) . '">' .
+					esc_attr( $data['plugin'] ) . '</a>';
 				} else {
-					echo esc_attr( $data['project'] );
+					echo esc_attr( $data['plugin'] );
 				}
 			}
 		}
@@ -242,11 +257,11 @@ if ( ! class_exists( 'Projects' ) ) {
 		/**
 		 * Shortcode to return all the projects
 		 *
-		 * [weop_projects]
+		 * [weop_plugin]
 		 *
 		 * @return string The HTML string of all the jobs
 		 */
-		public function get_projects() : string {
+		public function get_plugins() : string {
 
 			$meta_key_array = self::get_meta_key();
 
@@ -257,7 +272,7 @@ if ( ! class_exists( 'Projects' ) ) {
 				'orderby'        => 'ASC',
 			);
 
-			$loop = new \WP_Query( apply_filters( 'weop_projects_query', $args ) );
+			$loop = new \WP_Query( apply_filters( 'weop_plugin_query', $args ) );
 
 			$html = '';
 			if ( $loop->have_posts() ) {
@@ -266,24 +281,27 @@ if ( ! class_exists( 'Projects' ) ) {
 					$post  = $loop->post;
 					$data  = self::get_data( $post->ID );
 
-					do_action( 'weop_projects_before' );
-					$html .= '<div class="project" id="project-' . $post->ID . '">';
-					if ( '' === $data['project_url'] ) {
-						$html .= '<span class="project-url"><span>' . $data['project'] . '</span>';
-						$html .= '<span class="project-thumbnail">' . get_the_post_thumbnail( $post->ID ) . '</span>';
+					do_action( 'weop_plugins_before' );
+					$html .= '<div class="plugin" id="plugin-' . $post->ID . '">';
+					if ( '' === $data['plugin_url'] ) {
+						$html .= '<span class="plugin-url"><span>' . $data['plugin'] . '</span>';
+						$html .= '<span class="plugin-thumbnail">' . get_the_post_thumbnail( $post->ID ) . '</span>';
 					} else {
-						$html .= '<span class="project-url"><span><a href="' . $data['project_url'] . '" title="Click to view project" target="_blank">' . $data['project'] . '</a></span>';
-						$html .= '<span class="project-thumbnail"><a href="' . $data['project_url'] . '" title="Click to view project" target="_blank">' . get_the_post_thumbnail( $post->ID ) . '</a></span>';
+						$html .= '<span class="plugin-url"><span><a href="' . $data['plugin_url'] . '" title="Click to view plugin" target="_blank">' . $data['plugin'] . '</a></span>';
+						$html .= '<span class="plugin-thumbnail"><a href="' . $data['plugin_url'] . '" title="Click to view plugin" target="_blank">' . get_the_post_thumbnail( $post->ID ) . '</a></span>';
 					}
-					$html .= '<span class="project-content">' . get_the_content( $post->ID ) . '</span>';
-					$html .= '<div class="project-divider"></div>';
+					if ( '' !== $data['github_url'] ) {
+						$html .= '<span class="github-url"><a href="' . $data['github_url'] . '" title="Click to view plugin GitHub Repository" target="_blank">View GitHub Repository</a></span>';
+					}
+					$html .= '<span class="plugin-content">' . get_the_content( $post->ID ) . '</span>';
+					$html .= '<div class="plugin-divider"></div>';
 					$html .= '</div>';
-					do_action( 'weop_projects_after' );
+					do_action( 'weop_plugins_after' );
 				}
 			}
 			\wp_reset_postdata();
 
-			return apply_filters( 'weop_projects_html', $html );
+			return apply_filters( 'weop_plugins_html', $html );
 		}
 
 	}

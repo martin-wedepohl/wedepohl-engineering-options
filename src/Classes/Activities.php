@@ -123,10 +123,10 @@ if ( ! class_exists( 'Activities' ) ) {
 				'show_in_nav_menus'    => true,
 				'show_in_admin_bar'    => true,
 				'menu_position'        => 5,
-				'can_export'           => true,
-				'has_archive'          => true,
-				'exclude_from_search'  => false,
-				'publicly_queryable'   => true,
+				'can_export'           => false,
+				'has_archive'          => false,
+				'exclude_from_search'  => true,
+				'publicly_queryable'   => false,
 				'capability_type'      => 'post',
 				'show_in_rest'         => true,
 				'register_meta_box_cb' => array( $this, 'register_meta_box' ),
@@ -380,10 +380,8 @@ if ( ! class_exists( 'Activities' ) ) {
 						$end  = date_format( $date, $atts['date_format'] );
 					}
 
-					$html .= '<span class="activity-start">' . $start . '</span>';
-					$html .= ' to ';
-					$html .= '<span class="activity-end">' . $end . '</span>';
-					$html .= '<hr class="activity-divider">';
+					$html .= '<span class="activity-date">' . $start . ' to ' . $end . '</span>';
+					$html .= '<div class="activity-divider"></div>';
 					$html .= '</div>';
 					do_action( 'weop_activities_after' );
 				}

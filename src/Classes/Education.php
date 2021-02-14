@@ -133,10 +133,10 @@ if ( ! class_exists( 'Education' ) ) {
 				'show_in_nav_menus'    => true,
 				'show_in_admin_bar'    => true,
 				'menu_position'        => 5,
-				'can_export'           => true,
-				'has_archive'          => true,
-				'exclude_from_search'  => false,
-				'publicly_queryable'   => true,
+				'can_export'           => false,
+				'has_archive'          => false,
+				'exclude_from_search'  => true,
+				'publicly_queryable'   => false,
 				'capability_type'      => 'post',
 				'show_in_rest'         => true,
 				'register_meta_box_cb' => array( $this, 'register_meta_box' ),
@@ -394,7 +394,7 @@ if ( ! class_exists( 'Education' ) ) {
 				'meta_query'     => $meta_query,
 				'orderby'        => array(
 					'year' => 'DESC',
-				)
+				),
 			);
 
 			$loop = new \WP_Query( apply_filters( 'weop_education_query', $args ) );
@@ -403,8 +403,8 @@ if ( ! class_exists( 'Education' ) ) {
 			if ( $loop->have_posts() ) {
 				while ( $loop->have_posts() ) {
 					$loop->the_post();
-					$post  = $loop->post;
-					$data  = self::get_data( $post->ID );
+					$post = $loop->post;
+					$data = self::get_data( $post->ID );
 
 					do_action( 'weop_education_before' );
 					$html .= '<div class="education" id="education-' . $post->ID . '">';
@@ -415,7 +415,7 @@ if ( ! class_exists( 'Education' ) ) {
 					}
 					$html .= '<span class="education-institution">' . $data['institution'] . '</span>';
 					$html .= '<span class="education-year">' . $data['year'] . '</span>';
-					$html .= '<hr class="education-divider">';
+					$html .= '<div class="education-divider"></div>';
 					$html .= '</div>';
 					do_action( 'weop_education_after' );
 				}
