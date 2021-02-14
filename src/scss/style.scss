@@ -1,15 +1,8 @@
-div.education {
-	margin-top: 0;
-	margin-bottom: .8em;
-	padding-top: 0;
-	padding-bottom: 0;
-}
-
-.admin-bar .education-title,
-.admin-bar .skills-title,
-.admin-bar .work-experience-title,
-.admin-bar .activities-title {
-	padding-top: 46px;
+.education-section,
+.skills-section,
+.work-experience-section,
+.activities-section {
+	margin: 1em;
 }
 
 .education-title,
@@ -18,6 +11,13 @@ div.education {
 .activities-title {
 	display: flex;
 	flex-direction: column;
+}
+
+.admin-bar .education-title,
+.admin-bar .skills-title,
+.admin-bar .work-experience-title,
+.admin-bar .activities-title {
+	padding-top: 46px;
 }
 
 .education-title span,
@@ -29,11 +29,14 @@ div.education {
 }
 
 .education,
-.job {
+.skill,
+.job,
+.activity {
 	display: flex;
 	flex-direction: column;
 	font-size: 1.1rem;
 	line-height: 1.4;
+	margin-bottom: .8em;
 }
 
 .job-company {
@@ -41,7 +44,8 @@ div.education {
 	flex-direction: column;
 }
 
-.job-date {
+.job-date,
+.activity-date {
 	margin-bottom: 1em;
 }
 
@@ -53,16 +57,25 @@ div.education {
 }
 
 .activity-divider,
+.skill-divider,
 .education-divider,
 .job-divider,
 .project-divider {
 	width: 100%;
 	margin: 1em auto;
-	border-bottom-color: #ccc;
+	height: 1px;
+	background-color: #ccc;
 }
 
 @media (min-width: 768px) {
 
+	.education-section,
+	.skills-section,
+	.work-experience-section,
+	.activities-section {
+		margin: 1em 2em;
+	}
+	
 	.admin-bar .education-title,
 	.admin-bar .skills-title,
 	.admin-bar .work-experience-title,
@@ -87,17 +100,16 @@ div.education {
 		margin-bottom: 0;
 	}
 
-
-	div.education {
-		margin-bottom: .25em;
-	}
-
 	.education {
 		flex-direction: row;
 		gap: .5em;
+		margin-bottom: .25em;
 	}
 
-	.education-divider {
+	.education-divider,
+	.skill-divider,
+	.job-divider,
+	.activity-divider {
 		display: none;
 	}
 
