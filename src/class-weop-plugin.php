@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.15
+ * Version:     0.1.16
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.15';
+		const PLUGIN_VERSION = '0.1.16';
 
 		/**
 		 * Plugin name
@@ -104,7 +104,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			// Add Google Analytics to head.
 			add_action( 'wp_head', array( $this, 'add_analytics_in_header' ), 0 );
 
-			// Add page templates
+			// Add page templates.
 			add_filter( 'page_template', array( $this, 'load_page_template' ) );
 
 		}
@@ -266,77 +266,79 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 <div class="wrap">
 	<h1><?php esc_html_e( 'Wedepohl Engineering Options Information', 'weop' ); ?></h1>
-	<ul>
-		<?php
-			$html = sprintf(
-				'<strong>%s</strong> %s',
-				esc_html__( 'Menu Position:', 'weop' ),
-				esc_html__( 'The default menu position in the admin menu (Default=4)', 'weop' )
-			);
-		?>
-		<li><?php echo $html; ?>
-		<?php
-			$html = sprintf(
-				'<strong>%s</strong> %s',
-				esc_html__( 'Menu Icon:', 'weop' ),
-				esc_html__( 'The default menu icon in the admin menu (Default=dashicons-admin-generic)', 'weop' )
-			);
-		?>
-		<li><?php echo $html; ?>
-		<?php
-			$html = sprintf(
-				'<strong>%s</strong> %s',
-				esc_html__( 'Google Analytics Code:', 'weop' ),
-				esc_html__( 'Code for Google Analytics', 'weop' )
-			);
-		?>
-		<li><?php echo $html; ?>
-		<?php
-			$html = sprintf(
-				'<strong>%s</strong> %s',
-				esc_html__( 'Disable Comments:', 'weop' ),
-				esc_html__( 'Enable/Disable comments in the admin menus', 'weop' )
-			);
-		?>
-		<li><?php echo $html; ?>
-		<?php
-			$html = sprintf(
-				'<strong>%s</strong> %s',
-				esc_html__( 'Disable Block Full Screen:', 'weop' ),
-				esc_html__( 'Enable/Disable WordPress Blocks Full Screen Editor', 'weop' )
-			);
-		?>
-		<li><?php echo $html; ?>
-	</ul>
-	<h2><?php esc_html_e( 'Shortcodes', 'weop' ); ?></h2>
-	<ul>
-		<li>[weop_activities date_format="F Y"] - <?php esc_html_e( 'Return all the Activities with an optional date format', 'weop' ); ?> (F Y)</li>
-		<li>[weop_jobs date_format="F Y"] - <?php esc_html_e( 'Return all the Jobs with an optional date format', 'weop' ); ?> (F Y)</li>
-		<li>[weop_education show_seminars="false"] - <?php esc_html_e( 'Return all the Education with an optional show_seminar (default false) if the education is just a seminar', 'weop' ); ?></li>
-		<li>[weop_projects] - <?php esc_html_e( 'Return all the Projects', 'weop' ); ?></li>
-	</ul>
-	<h2><?php esc_html_e( 'Filters', 'weop' ); ?></h2>
-	<ul>
-		<li>weop_activities_query - <?php esc_html_e( 'Filter to alter the activities shortcode query', 'weop' ); ?></li>
-		<li>weop_activities_html - <?php esc_html_e( 'Filter to alter the activities shortcode html', 'weop' ); ?></li>
-		<li>weop_jobs_query - <?php esc_html_e( 'Filter to alter the jobs shortcode query', 'weop' ); ?></li>
-		<li>weop_jobs_html - <?php esc_html_e( 'Filter to alter the jobs shortcode html', 'weop' ); ?></li>
-		<li>weop_education_query - <?php esc_html_e( 'Filter to alter the education shortcode query', 'weop' ); ?></li>
-		<li>weop_education_html - <?php esc_html_e( 'Filter to alter the education shortcode html', 'weop' ); ?></li>
-		<li>weop_projects_query - <?php esc_html_e( 'Filter to alter the projects shortcode query', 'weop' ); ?></li>
-		<li>weop_projects_html - <?php esc_html_e( 'Filter to alter the projects shortcode html', 'weop' ); ?></li>
-	</ul>
-	<h2><?php esc_html_e( 'Actions', 'weop' ); ?></h2>
-	<ul>
-		<li>weop_activities_before - <?php esc_html_e( 'Action before the activities shortcode', 'weop' ); ?></li>
-		<li>weop_activities_after - <?php esc_html_e( 'Action after the activities shortcode', 'weop' ); ?></li>
-		<li>weop_education_before - <?php esc_html_e( 'Action before the education shortcode', 'weop' ); ?></li>
-		<li>weop_education_after - <?php esc_html_e( 'Action after the education shortcode', 'weop' ); ?></li>
-		<li>weop_jobs_before - <?php esc_html_e( 'Action before the jobs shortcode', 'weop' ); ?></li>
-		<li>weop_jobs_after - <?php esc_html_e( 'Action after the jobs shortcode', 'weop' ); ?></li>
-		<li>weop_projects_before - <?php esc_html_e( 'Action before the projects shortcode', 'weop' ); ?></li>
-		<li>weop_projects_after - <?php esc_html_e( 'Action after the projects shortcode', 'weop' ); ?></li>
-	</ul>
+	<div class="tabs">
+		<input id="tab1" name="tabs" type="radio" checked="checked">
+		<label for="tab1"><?php esc_html_e( 'Settings', 'weop' ); ?></label>
+		<input id="tab2" name="tabs" type="radio">
+		<label for="tab2"><?php esc_html_e( 'Custom Posts', 'weop' ); ?></label>
+		<input id="tab3" name="tabs" type="radio">
+		<label for="tab3"><?php esc_html_e( 'Shortcodes', 'weop' ); ?></label>
+		<input id="tab4" name="tabs" type="radio">
+		<label for="tab4"><?php esc_html_e( 'Filters', 'weop' ); ?></label>
+		<input id="tab5" name="tabs" type="radio">
+		<label for="tab5"><?php esc_html_e( 'Actions', 'weop' ); ?></label>
+		<div class="tab content1">
+			<ul>
+				<li><strong><?php esc_html_e( 'Menu Position:', 'weop' ); ?></strong> <?php esc_html_e( 'The default menu position in the admin menu (Default=4)', 'weop' ); ?></li>
+				<li><strong><?php esc_html_e( 'Menu Icon:', 'weop' ); ?></strong> <?php esc_html_e( 'The default menu icon in the admin menu (Default=dashicons-admin-generic)', 'weop' ); ?></li>
+				<li><strong><?php esc_html_e( 'Google Analytics Code:', 'weop' ); ?></strong> <?php esc_html_e( 'Google Analytics Code', 'weop' ); ?></li>
+				<li><strong><?php esc_html_e( 'Disable Comments:', 'weop' ); ?></strong> <?php esc_html_e( 'Enable/Disable comments in the admin menus', 'weop' ); ?></li>
+				<li><strong><?php esc_html_e( 'Disable Block Full Screen:', 'weop' ); ?></strong> <?php esc_html_e( 'Enable/Disable WordPress Blocks Full Screen Editor', 'weop' ); ?></li>
+			</ul>
+		</div>
+		<div class="tab content2">
+			<ul>
+				<li><strong>Activities</strong> - <?php esc_html_e( 'Activitues with start and stop dates', 'weop' ); ?> (F Y)</li>
+				<li><strong>Education</strong> - <?php esc_html_e( 'Education taken including seminars', 'weop' ); ?></li>
+				<li><strong>Jobs</strong> - <?php esc_html_e( 'Jobs worked at', 'weop' ); ?> (F Y)</li>
+				<li><strong>Plugins</strong> - <?php esc_html_e( 'WordPress Plugins developed', 'weop' ); ?></li>
+				<li><strong>Projects</strong> - <?php esc_html_e( 'Website Projects', 'weop' ); ?></li>
+				<li><strong>Skills</strong> - <?php esc_html_e( 'Skills', 'weop' ); ?></li>
+			</ul>
+		</div>
+		<div class="tab content3">
+			<ul>
+				<li><strong>[weop_activities date_format="F Y"]</strong> - <?php esc_html_e( 'Return all the Activities with an optional date format', 'weop' ); ?> (F Y)</li>
+				<li><strong>[weop_education show_seminars="false"]</strong> - <?php esc_html_e( 'Return all the Education with an optional show_seminar (default false) if the education is just a seminar', 'weop' ); ?></li>
+				<li><strong>[weop_jobs date_format="F Y"]</strong> - <?php esc_html_e( 'Return all the Jobs with an optional date format', 'weop' ); ?> (F Y)</li>
+				<li><strong>[weop_plugins]</strong> - <?php esc_html_e( 'Return all the Plugins', 'weop' ); ?></li>
+				<li><strong>[weop_projects]</strong> - <?php esc_html_e( 'Return all the Projects', 'weop' ); ?></li>
+				<li><strong>[weop_skills]</strong> - <?php esc_html_e( 'Return all the Skills', 'weop' ); ?></li>
+			</ul>
+		</div>
+		<div class="tab content4">
+			<ul>
+				<li><strong>weop_activities_query</strong> - <?php esc_html_e( 'Filter to alter the activities shortcode query', 'weop' ); ?></li>
+				<li><strong>weop_activities_html</strong> - <?php esc_html_e( 'Filter to alter the activities shortcode html', 'weop' ); ?></li>
+				<li><strong>weop_jobs_query</strong> - <?php esc_html_e( 'Filter to alter the jobs shortcode query', 'weop' ); ?></li>
+				<li><strong>weop_jobs_html</strong> - <?php esc_html_e( 'Filter to alter the jobs shortcode html', 'weop' ); ?></li>
+				<li><strong>weop_education_query</strong> - <?php esc_html_e( 'Filter to alter the education shortcode query', 'weop' ); ?></li>
+				<li><strong>weop_education_html</strong> - <?php esc_html_e( 'Filter to alter the education shortcode html', 'weop' ); ?></li>
+				<li><strong>weop_plugins_query</strong> - <?php esc_html_e( 'Filter to alter the plugins shortcode query', 'weop' ); ?></li>
+				<li><strong>weop_plugins_html</strong> - <?php esc_html_e( 'Filter to alter the plugins shortcode html', 'weop' ); ?></li>
+				<li><strong>weop_projects_query</strong> - <?php esc_html_e( 'Filter to alter the projects shortcode query', 'weop' ); ?></li>
+				<li><strong>weop_projects_html</strong> - <?php esc_html_e( 'Filter to alter the projects shortcode html', 'weop' ); ?></li>
+				<li><strong>weop_skills_query</strong> - <?php esc_html_e( 'Filter to alter the skills shortcode query', 'weop' ); ?></li>
+				<li><strong>weop_skills_html</strong> - <?php esc_html_e( 'Filter to alter the skills shortcode html', 'weop' ); ?></li>
+			</ul>
+		</div>
+		<div class="tab content5">
+			<ul>
+				<li><strong>weop_activities_before</strong> - <?php esc_html_e( 'Action before the activities shortcode', 'weop' ); ?></li>
+				<li><strong>weop_activities_after</strong> - <?php esc_html_e( 'Action after the activities shortcode', 'weop' ); ?></li>
+				<li><strong>weop_education_before</strong> - <?php esc_html_e( 'Action before the education shortcode', 'weop' ); ?></li>
+				<li><strong>weop_education_after</strong> - <?php esc_html_e( 'Action after the education shortcode', 'weop' ); ?></li>
+				<li><strong>weop_jobs_before</strong> - <?php esc_html_e( 'Action before the jobs shortcode', 'weop' ); ?></li>
+				<li><strong>weop_jobs_after</strong> - <?php esc_html_e( 'Action after the jobs shortcode', 'weop' ); ?></li>
+				<li><strong>weop_plugins_before</strong> - <?php esc_html_e( 'Action before the plugins shortcode', 'weop' ); ?></li>
+				<li><strong>weop_plugins_after</strong> - <?php esc_html_e( 'Action after the plugins shortcode', 'weop' ); ?></li>
+				<li><strong>weop_projects_before</strong> - <?php esc_html_e( 'Action before the projects shortcode', 'weop' ); ?></li>
+				<li><strong>weop_projects_after</strong> - <?php esc_html_e( 'Action after the projects shortcode', 'weop' ); ?></li>
+				<li><strong>weop_skills_before</strong> - <?php esc_html_e( 'Action before the skills shortcode', 'weop' ); ?></li>
+				<li><strong>weop_skills_after</strong> - <?php esc_html_e( 'Action after the skills shortcode', 'weop' ); ?></li>
+			</ul>
+		</div>
+	</div>
 </div>
 
 			<?php
