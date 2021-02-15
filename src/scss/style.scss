@@ -1,7 +1,10 @@
 .education-section,
 .skills-section,
 .work-experience-section,
-.activities-section {
+.activities-section,
+.plugins-section,
+.projects-section,
+.additional-seminars {
 	margin: 1em;
 }
 
@@ -31,7 +34,9 @@
 .education,
 .skill,
 .job,
-.activity {
+.activity,
+.project,
+.plugin {
 	display: flex;
 	flex-direction: column;
 	font-size: 1.1rem;
@@ -60,7 +65,8 @@
 .skill-divider,
 .education-divider,
 .job-divider,
-.project-divider {
+.project-divider,
+.plugin-divider {
 	width: 100%;
 	margin: 1em auto;
 	height: 1px;
@@ -109,7 +115,9 @@
 	.education-divider,
 	.skill-divider,
 	.job-divider,
-	.activity-divider {
+	.activity-divider,
+	.project-divider,
+	.plugin-divider {
 		display: none;
 	}
 

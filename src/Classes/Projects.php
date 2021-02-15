@@ -263,17 +263,21 @@ if ( ! class_exists( 'Projects' ) ) {
 			if ( $loop->have_posts() ) {
 				while ( $loop->have_posts() ) {
 					$loop->the_post();
-					$post  = $loop->post;
-					$data  = self::get_data( $post->ID );
+					$post = $loop->post;
+					$data = self::get_data( $post->ID );
 
 					do_action( 'weop_projects_before' );
 					$html .= '<div class="project" id="project-' . $post->ID . '">';
 					if ( '' === $data['project_url'] ) {
-						$html .= '<span class="project-url"><span>' . $data['project'] . '</span>';
-						$html .= '<span class="project-thumbnail">' . get_the_post_thumbnail( $post->ID ) . '</span>';
+						$html .= '<span class="project-url">' . $data['project'] . '</span>';
+						if ( has_post_thumbnail( $post->ID ) ) {
+							$html .= '<span class="project-thumbnail">' . get_the_post_thumbnail( $post->ID ) . '</span>';
+						}
 					} else {
-						$html .= '<span class="project-url"><span><a href="' . $data['project_url'] . '" title="Click to view project" target="_blank">' . $data['project'] . '</a></span>';
-						$html .= '<span class="project-thumbnail"><a href="' . $data['project_url'] . '" title="Click to view project" target="_blank">' . get_the_post_thumbnail( $post->ID ) . '</a></span>';
+						$html .= '<span class="project-url"><a href="' . $data['project_url'] . '" title="Click to view project" target="_blank">' . $data['project'] . '</a></span>';
+						if ( has_post_thumbnail( $post->ID ) ) {
+							$html .= '<span class="project-thumbnail"><a href="' . $data['project_url'] . '" title="Click to view project" target="_blank">' . get_the_post_thumbnail( $post->ID ) . '</a></span>';
+						}
 					}
 					$html .= '<span class="project-content">' . get_the_content( $post->ID ) . '</span>';
 					$html .= '<div class="project-divider"></div>';

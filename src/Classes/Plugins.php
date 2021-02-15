@@ -284,11 +284,15 @@ if ( ! class_exists( 'Plugins' ) ) {
 					do_action( 'weop_plugins_before' );
 					$html .= '<div class="plugin" id="plugin-' . $post->ID . '">';
 					if ( '' === $data['plugin_url'] ) {
-						$html .= '<span class="plugin-url"><span>' . $data['plugin'] . '</span>';
-						$html .= '<span class="plugin-thumbnail">' . get_the_post_thumbnail( $post->ID ) . '</span>';
+						$html .= '<span class="plugin-url">' . $data['plugin'] . '</span>';
+						if ( has_post_thumbnail( $post->ID ) ) {
+							$html .= '<span class="plugin-thumbnail">' . get_the_post_thumbnail( $post->ID ) . '</span>';
+						}
 					} else {
-						$html .= '<span class="plugin-url"><span><a href="' . $data['plugin_url'] . '" title="Click to view plugin" target="_blank">' . $data['plugin'] . '</a></span>';
-						$html .= '<span class="plugin-thumbnail"><a href="' . $data['plugin_url'] . '" title="Click to view plugin" target="_blank">' . get_the_post_thumbnail( $post->ID ) . '</a></span>';
+						$html .= '<span class="plugin-url"><a href="' . $data['plugin_url'] . '" title="Click to view plugin" target="_blank">' . $data['plugin'] . '</a></span>';
+						if ( has_post_thumbnail( $post->ID ) ) {
+							$html .= '<span class="plugin-thumbnail"><a href="' . $data['plugin_url'] . '" title="Click to view plugin" target="_blank">' . get_the_post_thumbnail( $post->ID ) . '</a></span>';
+						}
 					}
 					if ( '' !== $data['github_url'] ) {
 						$html .= '<span class="github-url"><a href="' . $data['github_url'] . '" title="Click to view plugin GitHub Repository" target="_blank">View GitHub Repository</a></span>';

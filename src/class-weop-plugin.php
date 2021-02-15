@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.17
+ * Version:     0.1.18
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.17';
+		const PLUGIN_VERSION = '0.1.18';
 
 		/**
 		 * Plugin name
@@ -126,7 +126,12 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			$basename = basename( $template );
 
-			if ( 'resume-template.php' === $basename || 'seminars-template.php' === $basename ) {
+			if (
+				'resume-template.php' === $basename ||
+				'seminars-template.php' === $basename ||
+				'projects-template.php' === $basename ||
+				'plugins-template.php' === $basename
+			) {
 				wp_enqueue_style( 'weop_style', plugin_dir_url( __FILE__ ) . 'dist/css/style.min.css', array(), self::PLUGIN_VERSION );
 			}
 
