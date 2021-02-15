@@ -26,9 +26,9 @@ if ( ! class_exists( 'Projects' ) ) {
 	 */
 	class Projects {
 
-		const POST_TYPE      = 'projects';
+		const POST_TYPE      = 'weop_projects';
 		const META_BOX_DATA  = 'weop_projects_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_projects_meta_box_nonce';
+		const META_BOX_NONCE = 'weop_projects_meta_box_nonce';
 
 		/**
 		 * Return the meta key
@@ -37,7 +37,7 @@ if ( ! class_exists( 'Projects' ) ) {
 		 */
 		public static function get_meta_key() : array {
 			return array(
-				'project_url' => '_meta_project_url',
+				'project_url' => '_meta_weop_project_url',
 			);
 		}
 
@@ -105,8 +105,8 @@ if ( ! class_exists( 'Projects' ) ) {
 			);
 
 			$args = array(
-				'label'                => __( 'projects', 'weop' ),
-				'description'          => __( 'Projects', 'weop' ),
+				'label'                => __( 'Projects', 'weop' ),
+				'description'          => __( 'Project', 'weop' ),
 				'labels'               => $labels,
 				'supports'             => array( 'title', 'editor', 'thumbnail' ),
 				'hierarchical'         => false,

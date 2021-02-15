@@ -27,9 +27,9 @@ if ( ! class_exists( 'Activities' ) ) {
 	class Activities {
 
 		const MAX_DATE       = '9999-12-31';
-		const POST_TYPE      = 'activities';
+		const POST_TYPE      = 'weop_activities';
 		const META_BOX_DATA  = 'weop_activities_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_activities_meta_box_nonce';
+		const META_BOX_NONCE = 'weop_activities_meta_box_nonce';
 
 		/**
 		 * The maximum year.
@@ -41,8 +41,8 @@ if ( ! class_exists( 'Activities' ) ) {
 		 */
 		public static function get_meta_key() {
 			return array(
-				'start' => '_meta_activities_start',
-				'end'   => '_meta_activities_end',
+				'start' => '_meta_weop_activities_start',
+				'end'   => '_meta_weop_activities_end',
 			);
 		}
 
@@ -112,10 +112,10 @@ if ( ! class_exists( 'Activities' ) ) {
 			);
 
 			$args = array(
-				'label'                => __( 'activity', 'weop' ),
+				'label'                => __( 'Activities', 'weop' ),
 				'description'          => __( 'Activity', 'weop' ),
 				'labels'               => $labels,
-				'supports'             => array( 'title' ),
+				'supports'             => array( 'title', 'editor' ),
 				'hierarchical'         => false,
 				'public'               => true,
 				'show_ui'              => true,
@@ -182,7 +182,7 @@ if ( ! class_exists( 'Activities' ) ) {
 				'label-classes' => 'input-label',
 				'label-text'    => __( 'End Year', 'weop' ),
 				'classes'       => 'width-100',
-				'value'         => $data,
+				'value'         => $end,
 				'type'          => 'date',
 				'name'          => 'end',
 				'id'            => 'end',
@@ -328,7 +328,7 @@ if ( ! class_exists( 'Activities' ) ) {
 			$meta_key_array = self::get_meta_key();
 
 			$args = array(
-				'post_type'      => 'activities',
+				'post_type'      => self::POST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'meta_type'      => 'DATE',

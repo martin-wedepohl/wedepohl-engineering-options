@@ -26,9 +26,9 @@ if ( ! class_exists( 'Plugins' ) ) {
 	 */
 	class Plugins {
 
-		const POST_TYPE      = 'plugins';
+		const POST_TYPE      = 'weop_plugins';
 		const META_BOX_DATA  = 'weop_plugins_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_plugins_meta_box_nonce';
+		const META_BOX_NONCE = 'weop_plugins_meta_box_nonce';
 
 		/**
 		 * Return the meta key
@@ -37,8 +37,8 @@ if ( ! class_exists( 'Plugins' ) ) {
 		 */
 		public static function get_meta_key() : array {
 			return array(
-				'plugin_url' => '_meta_plugin_url',
-				'github_url' => '_meta_github_url',
+				'plugin_url' => '_meta_weop_plugin_url',
+				'github_url' => '_meta_weop_github_url',
 			);
 		}
 
@@ -108,8 +108,8 @@ if ( ! class_exists( 'Plugins' ) ) {
 			);
 
 			$args = array(
-				'label'                => __( 'plugins', 'weop' ),
-				'description'          => __( 'Plugins', 'weop' ),
+				'label'                => __( 'Plugins', 'weop' ),
+				'description'          => __( 'Plugin', 'weop' ),
 				'labels'               => $labels,
 				'supports'             => array( 'title', 'editor', 'thumbnail' ),
 				'hierarchical'         => false,

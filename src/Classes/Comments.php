@@ -26,9 +26,13 @@ if ( ! class_exists( 'Comments' ) ) {
 		/**
 		 * Class constructor.
 		 *
+		 * @global $wp_version The WordPress version
+		 *
 		 * @param function $plugin Callback to get the plugin options.
 		 */
 		public function __construct( $plugin ) {
+
+			global $wp_version;
 
 			$options = $plugin->get_options();
 

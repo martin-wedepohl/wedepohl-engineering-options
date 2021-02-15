@@ -26,9 +26,9 @@ if ( ! class_exists( 'Skills' ) ) {
 	 */
 	class Skills {
 
-		const POST_TYPE      = 'skills';
+		const POST_TYPE      = 'weop_skills';
 		const META_BOX_DATA  = 'weop_skills_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_skills_meta_box_nonce';
+		const META_BOX_NONCE = 'weop_skills_meta_box_nonce';
 
 		/**
 		 * Return the post type
@@ -68,8 +68,8 @@ if ( ! class_exists( 'Skills' ) ) {
 			);
 
 			$args = array(
-				'label'               => __( 'skill', 'weop' ),
-				'description'         => __( 'Skills', 'weop' ),
+				'label'               => __( 'Skills', 'weop' ),
+				'description'         => __( 'Skill', 'weop' ),
 				'labels'              => $labels,
 				'supports'            => array( 'title', 'editor' ),
 				'hierarchical'        => false,

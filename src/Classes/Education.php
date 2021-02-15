@@ -26,9 +26,9 @@ if ( ! class_exists( 'Education' ) ) {
 	 */
 	class Education {
 
-		const POST_TYPE      = 'education';
+		const POST_TYPE      = 'weop_education';
 		const META_BOX_DATA  = 'weop_education_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_education_meta_box_nonce';
+		const META_BOX_NONCE = 'weop_education_meta_box_nonce';
 
 		/**
 		 * Maximum year.
@@ -42,10 +42,10 @@ if ( ! class_exists( 'Education' ) ) {
 		 */
 		public static function get_meta_key() : array {
 			return array(
-				'year'        => '_meta_education_year',
-				'course_url'  => '_meta_education_course_url',
-				'institution' => '_meta_education_institution',
-				'seminar'     => '_meta_education_seminar',
+				'year'        => '_meta_weop_education_year',
+				'course_url'  => '_meta_weop_education_course_url',
+				'institution' => '_meta_weop_education_institution',
+				'seminar'     => '_meta_weop_education_seminar',
 			);
 		}
 
@@ -122,7 +122,7 @@ if ( ! class_exists( 'Education' ) ) {
 			);
 
 			$args = array(
-				'label'                => __( 'education', 'weop' ),
+				'label'                => __( 'Education', 'weop' ),
 				'description'          => __( 'Education', 'weop' ),
 				'labels'               => $labels,
 				'supports'             => array( 'title' ),
@@ -364,34 +364,22 @@ if ( ! class_exists( 'Education' ) ) {
 
 			$atts = shortcode_atts(
 				array(
-					'show_seminars' => false,
+					'show_seminars' => 'false',
 				),
 				$atts,
 				'get_education'
 			);
 
-			if ( false === $atts['show_seminars'] ) {
-				$seminar_compare = 'NOT EXISTS';
+			if ( 'true' === $atts['show_seminars'] ) {
+				$seminar = '1';
 			} else {
-				$seminar_compare = 'EXISTS';
+				$seminar = '';
 			}
-
-			$meta_query = array(
-				'year'    => array(
-					'key'     => $meta_key_array['year'],
-					'compare' => 'EXISTS',
-				),
-				'seminar' => array(
-					'key'     => $meta_key_array['seminar'],
-					'compare' => $seminar_compare,
-				),
-			);
 
 			$args = array(
 				'post_type'      => self::POST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
-				'meta_query'     => $meta_query,
 				'orderby'        => array(
 					'year' => 'DESC',
 				),
@@ -406,18 +394,20 @@ if ( ! class_exists( 'Education' ) ) {
 					$post = $loop->post;
 					$data = self::get_data( $post->ID );
 
-					do_action( 'weop_education_before' );
-					$html .= '<div class="education" id="education-' . $post->ID . '">';
-					if ( '' === $data['course_url'] ) {
-						$html .= '<span class="education-course">' . $data['course'] . '</span>';
-					} else {
-						$html .= '<span class="education-course"><a href="' . $data['course_url'] . '" title="Click to view course" target="_blank">' . $data['course'] . '</a></span>';
+					if ( $seminar === $data['seminar'] ) {
+						do_action( 'weop_education_before' );
+						$html .= '<div class="education" id="education-' . $post->ID . '">';
+						if ( '' === $data['course_url'] ) {
+							$html .= '<span class="education-course">' . $data['course'] . '</span>';
+						} else {
+							$html .= '<span class="education-course"><a href="' . $data['course_url'] . '" title="Click to view course" target="_blank">' . $data['course'] . '</a></span>';
+						}
+						$html .= '<span class="education-institution">' . $data['institution'] . '</span>';
+						$html .= '<span class="education-year">' . $data['year'] . '</span>';
+						$html .= '<div class="education-divider"></div>';
+						$html .= '</div>';
+						do_action( 'weop_education_after' );
 					}
-					$html .= '<span class="education-institution">' . $data['institution'] . '</span>';
-					$html .= '<span class="education-year">' . $data['year'] . '</span>';
-					$html .= '<div class="education-divider"></div>';
-					$html .= '</div>';
-					do_action( 'weop_education_after' );
 				}
 			}
 			\wp_reset_postdata();

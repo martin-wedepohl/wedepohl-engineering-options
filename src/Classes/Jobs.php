@@ -27,9 +27,9 @@ if ( ! class_exists( 'Jobs' ) ) {
 	class Jobs {
 
 		const MAX_DATE       = '9999-12-31';
-		const POST_TYPE      = 'jobs';
+		const POST_TYPE      = 'weop_jobs';
 		const META_BOX_DATA  = 'weop_jobs_save_meta_box_data';
-		const META_BOX_NONCE = 'weo_jobs_meta_box_nonce';
+		const META_BOX_NONCE = 'weop_jobs_meta_box_nonce';
 
 		/**
 		 * Return the meta key
@@ -38,11 +38,11 @@ if ( ! class_exists( 'Jobs' ) ) {
 		 */
 		public static function get_meta_key() : array {
 			return array(
-				'start'       => '_meta_jobs_start',
-				'end'         => '_meta_jobs_end',
-				'company'     => '_meta_jobs_company',
-				'company_url' => '_meta_jobs_company_url',
-				'location'    => '_meta_jobs_location',
+				'start'       => '_meta_weop_jobs_start',
+				'end'         => '_meta_weop_jobs_end',
+				'company'     => '_meta_weop_jobs_company',
+				'company_url' => '_meta_weop_jobs_company_url',
+				'location'    => '_meta_weop_jobs_location',
 			);
 		}
 
@@ -120,8 +120,8 @@ if ( ! class_exists( 'Jobs' ) ) {
 			);
 
 			$args = array(
-				'label'                => __( 'jobs', 'weop' ),
-				'description'          => __( 'Jobs', 'weop' ),
+				'label'                => __( 'Jobs', 'weop' ),
+				'description'          => __( 'Job', 'weop' ),
 				'labels'               => $labels,
 				'supports'             => array( 'title', 'editor' ),
 				'hierarchical'         => false,
