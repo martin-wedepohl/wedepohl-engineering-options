@@ -22,7 +22,8 @@ input#start:not(:valid) {
 }
 
 // Settings tab styles
-	.tabs input {
+.we-tabs {
+	input {
 		display: none;
 	}
 
@@ -60,3 +61,4 @@ input#start:not(:valid) {
 		border-top: 1px solid #999;
 		padding: 12px;
 	}
+}

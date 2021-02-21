@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.18
+ * Version:     0.1.19
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -48,7 +48,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.18';
+		const PLUGIN_VERSION = '0.1.19';
 
 		/**
 		 * Plugin name
@@ -240,7 +240,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			<div class="wrap">
 			<?php settings_errors(); ?>
-				<h1><?php esc_html_e( 'Wedepohl Engineering Options', 'weop' ); ?></h1>
+				<h1><?php esc_html_e( 'Wedepohl Engineering Options - Version: ' . self::PLUGIN_VERSION, 'weop' ); ?></h1>
 				<form method="post" action="options.php">
 					<?php
 					settings_fields( $this->options_name );
@@ -260,8 +260,8 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			?>
 
 <div class="wrap">
-	<h1><?php esc_html_e( 'Wedepohl Engineering Options Information', 'weop' ); ?></h1>
-	<div class="tabs">
+	<h1><?php esc_html_e( 'Wedepohl Engineering Options Information - Version: ' . self::PLUGIN_VERSION, 'weop' ); ?></h1>
+	<div class="we-tabs">
 		<input id="tab1" name="tabs" type="radio" checked="checked">
 		<label for="tab1"><?php esc_html_e( 'Settings', 'weop' ); ?></label>
 		<input id="tab2" name="tabs" type="radio">
