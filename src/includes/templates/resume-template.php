@@ -8,7 +8,7 @@
 	<section id="education" class="education-section">
 		<h2 class="education-title">Education <span class="resume-nav">(<a href="#skills">Skills</a> | <a href="#work-experience">Work Experience</a> | <a href="#activities">Activities</a>)</span></h2>
 		<?php echo do_shortcode( '[weop_education]' ); ?>
-		<a href="/resume/additional-seminars">Additional Seminars</a>
+		<a href="<?php echo esc_url( get_site_url() ); ?>/resume/additional-seminars">Additional Seminars</a>
 	</section>
 
 	<section id="skills" class="skills-section">

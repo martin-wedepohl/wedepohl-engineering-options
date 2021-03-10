@@ -380,9 +380,9 @@ if ( ! class_exists( 'Education' ) ) {
 				'post_type'      => self::POST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
-				'orderby'        => array(
-					'year' => 'DESC',
-				),
+				'meta_type'      => 'NUMERIC',
+				'meta_key'       => $meta_key_array['year'],
+				'orderby'        => 'DESC',
 			);
 
 			$loop = new \WP_Query( apply_filters( 'weop_education_query', $args ) );
