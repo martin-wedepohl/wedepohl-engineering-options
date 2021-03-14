@@ -254,7 +254,8 @@ if ( ! class_exists( 'Projects' ) ) {
 				'post_type'      => self::POST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
-				'orderby'        => 'ASC',
+				'orderby'        => 'title',
+				'order'          => 'ASC',
 			);
 
 			$loop = new \WP_Query( apply_filters( 'weop_projects_query', $args ) );
