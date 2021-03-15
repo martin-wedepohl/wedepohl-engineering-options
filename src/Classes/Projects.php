@@ -206,6 +206,7 @@ if ( ! class_exists( 'Projects' ) ) {
 			$newcols['cb'] = $columns['cb'];
 			unset( $columns['cb'] );
 			$newcols['title'] = 'Project';
+			$newcols['url']   = 'Project URL';
 			unset( $columns['title'] );
 			// Want date last.
 			unset( $columns['date'] );
@@ -227,14 +228,12 @@ if ( ! class_exists( 'Projects' ) ) {
 		public function table_content( $column_name, $post_id ) {
 			$data = self::get_data( $post_id );
 
-			if ( 'title' === $column_name ) {
+			if ( 'url' === $column_name ) {
 				if ( isset( $data['project_url'] ) ) {
 					echo '<a href="' . esc_url( $data['project_url'] ) .
 					'" target="_blank" title="Go To ' .
 					esc_attr( $data['project'] ) . '">' .
 					esc_attr( $data['project'] ) . '</a>';
-				} else {
-					echo esc_attr( $data['project'] );
 				}
 			}
 		}

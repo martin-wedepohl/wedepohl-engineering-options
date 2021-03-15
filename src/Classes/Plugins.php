@@ -202,9 +202,9 @@ if ( ! class_exists( 'Plugins' ) ) {
 			}
 			// Now that we're authenticated, time to save the data.
 			$meta_key_array = self::get_meta_key();
-			$data           = esc_url_raw( $_POST['plugin_url'], array( 'http', 'https' ) );
+			$data = esc_url_raw( $_POST['plugin_url'], array( 'http', 'https' ) );
 			update_post_meta( $post_id, $meta_key_array['plugin_url'], $data );
-			$data           = esc_url_raw( $_POST['github_url'], array( 'http', 'https' ) );
+			$data = esc_url_raw( $_POST['github_url'], array( 'http', 'https' ) );
 			update_post_meta( $post_id, $meta_key_array['github_url'], $data );
 		}
 
@@ -220,7 +220,9 @@ if ( ! class_exists( 'Plugins' ) ) {
 			// Want the selection box and title (name for our custom post type) first.
 			$newcols['cb'] = $columns['cb'];
 			unset( $columns['cb'] );
-			$newcols['title'] = 'Plugin';
+			$newcols['title']  = 'Plugin';
+			$newcols['url']    = 'Plugin URL';
+			$newcols['github'] = 'GitHub';
 			unset( $columns['title'] );
 			// Want date last.
 			unset( $columns['date'] );
@@ -242,14 +244,19 @@ if ( ! class_exists( 'Plugins' ) ) {
 		public function table_content( $column_name, $post_id ) {
 			$data = self::get_data( $post_id );
 
-			if ( 'title' === $column_name ) {
+			if ( 'url' === $column_name ) {
 				if ( isset( $data['plugin_url'] ) ) {
 					echo '<a href="' . esc_url( $data['plugin_url'] ) .
 					'" target="_blank" title="Go To ' .
 					esc_attr( $data['plugin'] ) . '">' .
 					esc_attr( $data['plugin'] ) . '</a>';
-				} else {
-					echo esc_attr( $data['plugin'] );
+				}
+			}
+			if ( 'github' === $column_name ) {
+				if ( isset( $data['github_url'] ) ) {
+					echo '<a href="' . esc_url( $data['github_url'] ) .
+					'" target="_blank" title="Go To GitHub Page">' .
+					'GitHub</a>';
 				}
 			}
 		}
