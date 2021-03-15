@@ -46,6 +46,12 @@
 	order: 4;
 }
 
+.plugin:last-of-type {
+	.plugin-divider {
+		display: none;
+	}
+}
+
 @media (min-width: 800px) {
 	.plugin {
 		display: grid;

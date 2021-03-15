@@ -37,6 +37,12 @@
 	background-color: #ccc;
 }
 
+.project:last-of-type {
+	.project-divider {
+		display: none;
+	}
+}
+
 @media (min-width: 800px) {
 
 	.project {

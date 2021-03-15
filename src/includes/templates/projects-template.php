@@ -5,6 +5,8 @@
 
 	<h1><?php the_title(); ?></h1>
 
+	<?php the_content(); ?>
+
 	<section id="projects" class="projects-section">
 		<?php echo do_shortcode( '[weop_projects]' ); ?>
 	</section>
