@@ -1,0 +1,63 @@
+.projects-section {
+	margin: 1em;
+	max-width: 1400px;
+}
+
+.project {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	font-size: 1.1rem;
+	line-height: 1.4;
+	margin-bottom: .8em;
+}
+
+.project-url {
+	margin-bottom: 1em;
+}
+
+.project-thumbnail {
+	margin-bottom: 1em;
+
+	a > img {
+		width: 300px;
+		height: 300px;
+	}
+}
+
+.project-content p {
+	margin-bottom: 1em;
+	line-height: 1.5;
+}
+
+.project-divider {
+	width: 100%;
+	margin: 1em auto;
+	height: 1px;
+	background-color: #ccc;
+}
+
+@media (min-width: 800px) {
+
+	.project {
+		flex-direction: row;
+	}
+	
+	.project-url {
+		width: 100%;
+	}
+	
+	.project-thumbnail {
+		width: 40%;
+		a > img {
+			width: initial;
+			height: initial;
+		}
+	}
+	
+	.project-content {
+		margin-left: 1em;
+		width: 55%;
+	}
+	
+} 

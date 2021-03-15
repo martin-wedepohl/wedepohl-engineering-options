@@ -1,0 +1,84 @@
+.plugins-section {
+	margin: 1em;
+	max-width: 1400px;
+}
+
+.plugin {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	font-size: 1.1rem;
+	line-height: 1.4;
+	margin-bottom: .8em;
+}
+
+.plugin-url {
+	margin-bottom: 1em;
+}
+
+.github-url {
+	margin-bottom: 1em;
+	order: 3;
+}
+
+.plugin-thumbnail {
+	a {
+		img {
+			width: 150px;
+			height: 150px;
+		}
+	}
+	margin-bottom: 1em;
+}
+
+.plugin-content {
+	p {
+		margin-bottom: 1em;
+		line-height: 1.5;
+	}
+}
+
+.plugin-divider {
+	width: 100%;
+	margin: 1em auto;
+	height: 1px;
+	background-color: #ccc;
+	order: 4;
+}
+
+@media (min-width: 800px) {
+	.plugin {
+		display: grid;
+		grid-template-areas: 
+			"title title title title"
+			"image content content content"
+			"github content content content"
+			"divider divider divider divider";
+		grid-template-columns: 250px auto;
+		grid-template-rows: auto 175px auto;
+	}
+	
+	.plugin-url {
+		width: 100%;
+		grid-area: title;
+	}
+
+	.github-url {
+		grid-area: github
+	}
+	
+	.plugin-thumbnail {
+		grid-area: image;
+		width: 100%;
+		height: 100px;
+	}
+	
+	.plugin-content {
+		grid-area: content;
+	}
+
+	.plugin-divider {
+		grid-area: divider;
+	}
+
+}

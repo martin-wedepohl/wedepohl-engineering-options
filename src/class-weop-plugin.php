@@ -46,9 +46,10 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 	 */
 	class WEOP_Plugin {
 
+		const DEBUG_PLUGIN   = true;
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.21';
+		const PLUGIN_VERSION = '0.1.22';
 
 		/**
 		 * Plugin name
@@ -125,16 +126,29 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			global $template;
 
 			$basename = basename( $template );
+			$css      = '';
 
-			if (
-				'resume-template.php' === $basename ||
-				'seminars-template.php' === $basename ||
-				'projects-template.php' === $basename ||
-				'plugins-template.php' === $basename
-			) {
-				wp_enqueue_style( 'weop_style', plugin_dir_url( __FILE__ ) . 'dist/css/style.min.css', array(), self::PLUGIN_VERSION );
+			if ( 'resume-template.php' === $basename || 'seminars-template.php' === $basename ) {
+				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/resume.min.css';
+				$css  = \plugin_dir_url( __FILE__ )  . 'dist/css/resume.min.css';
+			} elseif ( 'projects-template.php' === $basename ) {
+				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/projects.min.css';
+				$css  = \plugin_dir_url( __FILE__ )  . 'dist/css/projects.min.css';
+			} elseif ( 'plugins-template.php' === $basename ) {
+				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/plugins.min.css';
+				$css  = \plugin_dir_url( __FILE__ )  . 'dist/css/plugins.min.css';
 			}
-
+	
+			if ( '' !== $css ) {
+				$filemtime = filemtime( $file );
+				\wp_enqueue_style(
+					'weop_style',
+					$css,
+					array(),
+					self::DEBUG_PLUGIN ? $filemtime : self::PLUGIN_VERSION,
+					'all'
+				);
+			}
 		}
 
 		/**
