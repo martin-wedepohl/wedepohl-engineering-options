@@ -1,3 +1,5 @@
+@use 'mixins' as *;
+
 .education-section,
 .skills-section,
 .work-experience-section,
@@ -73,7 +75,7 @@
 	background-color: #ccc;
 }
 
-@media (min-width: 1200px) {
+@include mq(large) {
 
 	.education-section,
 	.skills-section,

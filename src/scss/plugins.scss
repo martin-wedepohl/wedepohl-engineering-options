@@ -1,3 +1,5 @@
+@use 'mixins' as *;
+
 .plugins-section {
 	margin: 1em;
 	max-width: 1400px;
@@ -22,8 +24,8 @@
 }
 
 .plugin-thumbnail {
-	a {
-		img {
+	& a {
+		& img {
 			width: 150px;
 			height: 150px;
 		}
@@ -32,7 +34,7 @@
 }
 
 .plugin-content {
-	p {
+	& p {
 		margin-bottom: 1em;
 		line-height: 1.5;
 	}
@@ -47,12 +49,12 @@
 }
 
 .plugin:last-of-type {
-	.plugin-divider {
+	& .plugin-divider {
 		display: none;
 	}
 }
 
-@media (min-width: 800px) {
+@include mq(medium) {
 	.plugin {
 		display: grid;
 		grid-template-areas: 

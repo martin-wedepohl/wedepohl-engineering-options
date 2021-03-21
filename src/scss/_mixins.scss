@@ -1,0 +1,23 @@
+@use 'sass:map';
+
+@use 'breakpoints' as *;
+
+@mixin mq($key) {
+	$size: map.get($breakpoints, $key);
+
+	@media (min-width: $size) {
+		@content;
+	}
+}
+
+@include mq(medium) {
+	body {
+		color: var(--wet-base-color);
+	}
+}
+
+@include mq(large) {
+	body {
+		color: var(--wet-base-color);
+	}
+}

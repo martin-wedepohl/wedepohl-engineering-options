@@ -6,6 +6,8 @@ const del = require("del");
 const mode = require("gulp-mode")();
 const rename = require("gulp-rename");
 const sass = require("gulp-dart-sass");
+const postcss = require('gulp-postcss');
+const combineMediaQuery = require('postcss-combine-media-query');
 const sourcemaps = require("gulp-sourcemaps");
 const browserify = require("browserify");
 const babelify = require("babelify");
@@ -32,7 +34,8 @@ const vendor = srcBase + "/vendor";
 
 const indexJsFile = "/script.js";
 const adminJsFile = "/script-admin.js";
-const jsFiles = [indexJsFile, adminJsFile];
+const contactUsFile = "/contact-us.js";
+const jsFiles = [indexJsFile, adminJsFile, contactUsFile];
 
 // clean tasks
 const clean = () => del([distBase], {force: true});
@@ -67,6 +70,9 @@ const css = () => {
         .pipe(mode.development(sourcemaps.init({loadMaps: true})))
         .pipe(sass().on("error", sass.logError))
         .pipe(autoprefixer())
+		.pipe(postcss([
+			combineMediaQuery()
+		]))
         .pipe(
             rename(({ dirname, basename, extname }) => {
                 return {

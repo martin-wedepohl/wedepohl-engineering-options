@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.24
+ * Version:     0.1.25
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -49,7 +49,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		const DEBUG_PLUGIN   = true;
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.24';
+		const PLUGIN_VERSION = '0.1.25';
 
 		/**
 		 * Plugin name
@@ -127,18 +127,22 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			$basename = basename( $template );
 			$css      = '';
+			$js       = '';
 
 			if ( 'resume-template.php' === $basename || 'seminars-template.php' === $basename ) {
 				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/resume.min.css';
-				$css  = \plugin_dir_url( __FILE__ )  . 'dist/css/resume.min.css';
+				$css  = \plugin_dir_url( __FILE__ ) . 'dist/css/resume.min.css';
 			} elseif ( 'projects-template.php' === $basename ) {
 				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/projects.min.css';
-				$css  = \plugin_dir_url( __FILE__ )  . 'dist/css/projects.min.css';
+				$css  = \plugin_dir_url( __FILE__ ) . 'dist/css/projects.min.css';
 			} elseif ( 'plugins-template.php' === $basename ) {
 				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/plugins.min.css';
-				$css  = \plugin_dir_url( __FILE__ )  . 'dist/css/plugins.min.css';
+				$css  = \plugin_dir_url( __FILE__ ) . 'dist/css/plugins.min.css';
+			} elseif ( 'contact-us-template.php' === $basename ) {
+				$file = \plugin_dir_path( __FILE__ ) . 'dist/css/contact-us.min.css';
+				$css  = \plugin_dir_url( __FILE__ ) . 'dist/css/contact-us.min.css';
 			}
-	
+
 			if ( '' !== $css ) {
 				$filemtime = filemtime( $file );
 				\wp_enqueue_style(
@@ -147,6 +151,22 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 					array(),
 					self::DEBUG_PLUGIN ? $filemtime : self::PLUGIN_VERSION,
 					'all'
+				);
+			}
+
+			if ( 'contact-us-template.php' === $basename ) {
+				$file = \plugin_dir_path( __FILE__ ) . 'dist/js/contact-us.min.js';
+				$js  = \plugin_dir_url( __FILE__ ) . 'dist/js/contact-us.min.js';
+			}
+
+			if ( '' !== $js ) {
+				$filemtime = filemtime( $file );
+				\wp_enqueue_script(
+					'weop_script',
+					$js,
+					array(),
+					self::DEBUG_PLUGIN ? $filemtime : self::PLUGIN_VERSION,
+					true
 				);
 			}
 		}
@@ -706,9 +726,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 				} elseif ( file_exists( $plugin_file ) ) {
 					return $plugin_file;
 				}
-			}
-
-			if ( is_page( 'projects' ) ) {
+			} elseif ( is_page( 'projects' ) ) {
 				$file        = 'templates/projects-template.php';
 				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
 				$plugin_file = $plugin_dir . $file;
@@ -720,9 +738,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 				} elseif ( file_exists( $plugin_file ) ) {
 					return $plugin_file;
 				}
-			}
-
-			if ( is_page( 'resume' ) ) {
+			} elseif ( is_page( 'resume' ) ) {
 				$file        = 'templates/resume-template.php';
 				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
 				$plugin_file = $plugin_dir . $file;
@@ -734,10 +750,20 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 				} elseif ( file_exists( $plugin_file ) ) {
 					return $plugin_file;
 				}
-			}
-
-			if ( is_page( 'additional-seminars' ) ) {
+			} elseif ( is_page( 'additional-seminars' ) ) {
 				$file        = 'templates/seminars-template.php';
+				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
+				$plugin_file = $plugin_dir . $file;
+				$theme_dir   = get_stylesheet_directory() . '/plugins/wedepohl-engineering-options/';
+				$theme_file  = $theme_dir . $file;
+
+				if ( file_exists( $theme_file ) ) {
+					return $theme_file;
+				} elseif ( file_exists( $plugin_file ) ) {
+					return $plugin_file;
+				}
+			} elseif ( is_page( 'contact-us' ) ) {
+				$file        = 'templates/contact-us-template.php';
 				$plugin_dir  = plugin_dir_path( __FILE__ ) . 'includes/';
 				$plugin_file = $plugin_dir . $file;
 				$theme_dir   = get_stylesheet_directory() . '/plugins/wedepohl-engineering-options/';
@@ -758,6 +784,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 	$weop = new WEOP_Plugin();
 	new Classes\Comments( $weop );
+	$weop_contact = new Classes\Contact( $weop );
 	new Classes\DisableFS( $weop );
 	new Classes\Activities();
 	new Classes\Education();

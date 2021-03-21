@@ -1,0 +1,71 @@
+:root {
+	--color-contact-error: #f00;
+	--color-contact-success: #0f0;
+}
+
+.error,
+.success {
+	padding: 5px 9px;
+	border-radius: 3px;
+	border: 1px solid transparent;
+	font-weight: bold;
+	margin: 1em 0;
+}
+
+.error{
+    border-color: var(--color-contact-error);
+    color:var(--color-contact-error);
+}
+ 
+.success{
+    border-color: var(--color-contact-success);
+    color: var(--color-contact-success);
+}
+
+label {
+	display: block;
+	font-weight: bold;
+}
+
+label + input,
+label + textarea {
+	margin-bottom: 1em;
+}
+
+.required::after {
+	content: ' *';
+	font-weight: bold;
+	color: var(--color-contact-error);
+}
+
+input:not([type=submit]) {
+	width: 60ch;
+}
+
+input[type=submit] {
+	display: block;
+	padding: .75em 1.5em;
+	border-radius: .3em;
+	font-size: 1rem;
+	color: black;
+	background: white;
+	transition: all .25s ease-in-out;
+	cursor: pointer;
+
+	&:hover {
+		color: white;
+		background: black;
+	}
+
+	&.disabled {
+		color: black;
+		background: white;
+		opacity: .3;
+		cursor: unset;
+	}
+}
+
+textarea {
+	width: 60ch;
+	height: 10ch;
+}
