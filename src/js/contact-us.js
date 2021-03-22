@@ -21,6 +21,14 @@ const validEmail = (email) => {
 	return re.test(String(email).toLowerCase());
 }
 
+const checkInputs = () => {
+	nameValid = name.value.length > 0 ? true : false;
+	emailValid = email.value.length > 0 ? true : false;
+	messageValid = message.value.length > 0 ? true : false;
+	humanTestValid = humanTest.value.length > 0 ? true : false;
+	canSubmit();
+}
+
 /**
  * Check if all the inputs have at least something in the input
  * and set the appropriate disabled class on the submit button.
@@ -77,3 +85,5 @@ name.addEventListener("keyup", e => {
 	humanTestValid = e.target.value.length > 0 ? true : false;
 	canSubmit();
 });
+
+checkInputs();

@@ -53,26 +53,26 @@ if ( ! class_exists( 'Contact' ) ) {
 		public function display_form() {
 			$post_input = $this->get_post_args();
 			
-			if ( isset( $post_input['submitted'] ) ) {
+			if ( ! isset( $post_input['submitted'] ) ) {
 				$response = '';
 			} else {
 				$response = $this->send_email( $post_input );
 			}
-			$name  = isset( $post_input['name'] ) ? $post_input['name'] : '';
-			$email = isset( $post_input['email'] ) ? $post_input['email'] : '';
-			$message = isset( $post_input['email'] ) ? $post_input['email'] : '';
+			$name  = isset( $post_input['sender_name'] ) ? $post_input['sender_name'] : '';
+			$email = isset( $post_input['sender_email'] ) ? $post_input['sender_email'] : '';
+			$message = isset( $post_input['sender_message'] ) ? $post_input['sender_message'] : '';
 			?>
 <div id="contact-us-form">
 	<?php echo $response; ?>
-	<form action="<?php the_permalink(); ?>" method="post">
-		<label for="name" class="required">Name:</label>
-		<input type="text" id="name" name="name" required value="<?php echo esc_attr($name); ?>">
-		<label for="email" class="required">Email:</label>
-		<input type="text" id="email" name="email" required value="<?php echo esc_attr($email); ?>">
-		<label for="message" class="required">Message:</label>
-		<textarea type="text" id="message" name="message" required><?php echo esc_textarea($message); ?></textarea>
-		<label for="human_test" class="required">Human Verification:</label>
-		<input type="text" id="human_test" class="human_test" name="human_test" required> + 3 = 5
+	<form id="contact-us-form" action="<?php echo esc_url( get_permalink() ); ?>" method="post">
+		<label for="sender_name" class="required">Name:</label>
+		<input type="text" id="name" name="sender_name" required value="<?php echo esc_attr($name); ?>">
+		<label for="sender_email" class="required">Email:</label>
+		<input type="text" id="email" name="sender_email" required value="<?php echo esc_attr($email); ?>">
+		<label for="sender_message" class="required">Message:</label>
+		<textarea type="text" id="message" name="sender_message" required><?php echo esc_textarea($message); ?></textarea>
+		<label for="is_human" class="required">Human Verification:</label>
+		<input type="text" id="human_test" class="human_test" name="is_human" required> + 3 = 5
 		<input type="hidden" name="submitted" value="1">
 		<?php wp_nonce_field( 'weop-contact-form', 'weop-contact-form-nonce' ); ?>
 		<input type="submit" id="submit" class="disabled" value="Send">
@@ -100,19 +100,31 @@ if ( ! class_exists( 'Contact' ) ) {
 		}
 
 		public function get_post_args(): array {
-			$args = [
-				'human_test'              => FILTER_VALIDATE_INT,
-				'name'                    => FILTER_SANITIZE_STRING,
-				'message'                 => FILTER_SANITIZE_STRING,
-				'weop-contact-form-nonce' => FILTER_SANITIZE_STRING,
-				'_wp_http_referer'        => FILTER_SANITIZE_STRING,
-				'email'                   => FILTER_VALIDATE_EMAIL,
-			];
+			$post_args = [];
+			$textareas = ['sender_message'];
+			$ints      = ['is_human', 'submitted'];
+			$emails    = ['sender_email'];
 
-			$post_args = filter_input_array( INPUT_POST, $args );
+			foreach($_POST as $k => $v) {
+				$v = trim( $v );	//so we are sure it is whitespace free at both ends.
 
-			if ( null === $post_args ) {
-				return [];
+				if ( in_array( $k, $ints ) ) {
+					$v = filter_var( $v, FILTER_VALIDATE_INT );
+				} elseif ( in_array( $k, $emails ) ) {
+					$v = filter_var( $v, FILTER_VALIDATE_EMAIL );
+				} else {
+					//preserve newline for textarea answers.
+					if ( in_array( $k, $textareas ) ) {
+						$v = str_replace( "\n", "[NEWLINE]", $v );
+					}
+					//sanitise string.
+					$v = filter_var( $v, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
+					//now replace the placeholder with the original newline.
+					if ( in_array( $k, $textareas ) ) {
+						$v = str_replace( "[NEWLINE]", "\n", $v );
+					}
+				}
+				$post_args[$k] = $v;
 			}
 
 			return $post_args;
@@ -130,28 +142,28 @@ if ( ! class_exists( 'Contact' ) ) {
 				return $this->generate_response( self::NONCE_INVALID);
 			}
 
-			if ( false === $post_input['human_test'] ) {
+			if ( false === $post_input['is_human'] ) {
 				return $this->generate_response( self::MISSING_CONTACT );
 			}
 
-			if ( 2 !== $post_input['human_test'] ) {
+			if ( 2 !== $post_input['is_human'] ) {
 				return $this->generate_response( self::NOT_HUMAN );
 			}
 
-			if ( false === $post_input['email'] ) {
+			if ( false === $post_input['sender_email'] ) {
 				return $this->generate_response( self::EMAIL_INVALID );
 			}
 
-			if ( empty( $post_input['name'] ) || empty( $post_input['message'] ) ) {
+			if ( empty( $post_input['sender_name'] ) || empty( $post_input['sender_message'] ) ) {
 				return $this->generate_response( self::MISSING_CONTACT );
 			}
 
 			// Input valid send email
 			$to      = get_option( 'admin_email' );
 			$subject = 'Someone sent a message from ' . get_bloginfo( 'name' );
-			$headers = "From: {$post_input['email']}\r\nReply-To: {$post_input['email']}\r\n";
+			$headers = "From: {$post_input['sender_email']}\r\nReply-To: {$post_input['sender_email']}\r\n";
 
-			if ( ! wp_mail( $to, $subject, strip_tags( $post_input['message'] ), $headers ) ) {
+			if ( ! wp_mail( $to, $subject, strip_tags( $post_input['sender_message'] ), $headers ) ) {
 				return $this->generate_response( self::MESSAGE_UNSENT );
 			}
 
