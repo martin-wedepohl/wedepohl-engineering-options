@@ -29,6 +29,7 @@ const distScriptPath = "js/";
 const styleFiles = srcStylePath + "/**/*.scss";
 const scriptFiles = srcScriptPath + "/**/*.js";
 const rootFiles = srcBase + "/**/*.php";
+const utilities = srcBase + "/utilities/**/*";
 const licenseFile = "./license.txt";
 const vendor = srcBase + "/vendor";
 
@@ -44,12 +45,12 @@ const clean = () => del([distBase], {force: true});
 const copyRoot = () => {
     src(rootFiles)
 		.pipe(dest(distBase));
+	src(utilities)
+		.pipe(dest(distBase + "/utilities"));
 	src(vendor)
 		.pipe(dest(distBase));
 	return src(licenseFile)
 		.pipe(dest(distBase));
-    // return src(templateFiles)
-    //     .pipe(dest(distTemplatePath));
 }
 
 const copyIndex = () => {
@@ -60,6 +61,8 @@ const copyIndex = () => {
         .pipe(dest(distBase + "/Classes"))
         .pipe(dest(distBase + "/includes"))
         .pipe(dest(distBase + "/includes/templates"))
+        .pipe(dest(distBase + "/utilities"))
+        .pipe(dest(distBase + "/utilities/fonts"))
         .pipe(dest(distBase + "/vendor"))
         .pipe(dest(distBase + "/vendor/composer"))
 }

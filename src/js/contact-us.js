@@ -3,6 +3,7 @@ const email     = document.getElementById("email");
 const message   = document.getElementById("message");
 const humanTest = document.getElementById("human_test");
 const submit    = document.getElementById("submit");
+const captchaRefresh = document.getElementById("captcha-refresh");
 
 let nameValid      = false;
 let emailValid     = false;
@@ -40,6 +41,11 @@ const canSubmit = () => {
 		submit.classList.add("disabled");
 	}
 }
+
+captchaRefresh.addEventListener("click", (e) => {
+	const file = e.target.dataset.file;
+	document.querySelector(".captcha-image").src = `${file}?` + Date.now();
+});
 
 /**
  * Called when the submit button is clicked.

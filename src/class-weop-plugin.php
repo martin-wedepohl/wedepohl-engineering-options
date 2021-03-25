@@ -98,6 +98,19 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			// Add page templates.
 			add_filter( 'page_template', array( $this, 'load_page_template' ) );
 
+			// Start the session.
+			add_action( 'init', array( $this, 'session_start' ) );
+
+		}
+
+		public function session_start() {
+
+			if ( ! session_id() ) {
+
+				session_start();
+
+			}
+
 		}
 
 		/**
@@ -491,6 +504,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 				'video-alt',
 				'video-alt2',
 				'video-alt3',
+				'image-rotate',
 				'image-crop',
 				'image-rotate-left',
 				'image-rotate-right',

@@ -12,6 +12,8 @@
 
 namespace WEOP\Classes;
 
+session_start();
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 defined( 'ABSPATH' ) || die( '' );
@@ -23,12 +25,13 @@ if ( ! class_exists( 'Contact' ) ) {
 	 */
 	class Contact {
 
-		const NOT_HUMAN       = 'Human verification failed.';
-		const MISSING_CONTACT = 'Please supply all information.';
-		const EMAIL_INVALID   = 'Email Address Invalid.';
-		const NONCE_INVALID   = 'Form Submission Invalid.';
-		const MESSAGE_UNSENT  = 'Message was not sent. Try Again.';
-		const MESSAGE_SENT    = 'Thanks! Your message has been sent.';
+
+		const NOT_HUMAN       = '<div class="error">Human verification failed.</div>';
+		const MISSING_CONTACT = '<div class="error">Please supply all information.</div>';
+		const EMAIL_INVALID   = '<div class="error">Email Address Invalid.</div>';
+		const NONCE_INVALID   = '<div class="error">Form Submission Invalid.</div>';
+		const MESSAGE_UNSENT  = '<div class="error">Message was not sent. Try Again.</div>';
+		const MESSAGE_SENT    = '<div class="success">Thanks! Your message has been sent.</div>';
 
 		/**
 		 * Get Options callback
@@ -45,22 +48,24 @@ if ( ! class_exists( 'Contact' ) ) {
 		 */
 		public function __construct( $plugin ) {
 			$this->main_plugin = $plugin;
-
-			// add_action( 'enqueue_block_editor_assets', array( $this, 'disable_editor_fullscreen' ) );
-
 		}
 
 		public function display_form() {
 			$post_input = $this->get_post_args();
-			
+
+			$success = false;
 			if ( ! isset( $post_input['submitted'] ) ) {
 				$response = '';
 			} else {
 				$response = $this->send_email( $post_input );
+				if ( self::MESSAGE_SENT === $response ) {
+					$success = true;
+				}
 			}
-			$name  = isset( $post_input['sender_name'] ) ? $post_input['sender_name'] : '';
-			$email = isset( $post_input['sender_email'] ) ? $post_input['sender_email'] : '';
-			$message = isset( $post_input['sender_message'] ) ? $post_input['sender_message'] : '';
+			$name    = $success ? '' : isset( $post_input['sender_name'] ) ? $post_input['sender_name'] : '';
+			$email   = $success ? '' : isset( $post_input['sender_email'] ) ? $post_input['sender_email'] : '';
+			$message = $success ? '' : isset( $post_input['sender_message'] ) ? $post_input['sender_message'] : '';
+
 			?>
 <div id="contact-us-form">
 	<?php echo $response; ?>
@@ -71,8 +76,12 @@ if ( ! class_exists( 'Contact' ) ) {
 		<input type="text" id="email" name="sender_email" required value="<?php echo esc_attr($email); ?>">
 		<label for="sender_message" class="required">Message:</label>
 		<textarea type="text" id="message" name="sender_message" required><?php echo esc_textarea($message); ?></textarea>
-		<label for="is_human" class="required">Human Verification:</label>
-		<input type="text" id="human_test" class="human_test" name="is_human" required> + 3 = 5
+		<div class="captcha-div">
+			<img src="<?php echo plugin_dir_url( __DIR__ ); ?>utilities/captcha.php" alt="CAPTCHA" class="captcha-image">
+			<span title="Refresh Captcha" id="captcha-refresh" data-file="<?php echo plugin_dir_url( __DIR__ ); ?>utilities/captcha.php" class="content-icon dashicons dashicons-image-rotate"></span>
+		</div>
+		<label for="is_human" class="required">Enter characters show in image above:</label>
+		<input type="text" id="human_test" class="human_test" name="is_human" required>
 		<input type="hidden" name="submitted" value="1">
 		<?php wp_nonce_field( 'weop-contact-form', 'weop-contact-form-nonce' ); ?>
 		<input type="submit" id="submit" class="disabled" value="Send">
@@ -81,45 +90,27 @@ if ( ! class_exists( 'Contact' ) ) {
 			<?php
 		}
 
-		/**
-		 * Generate contact form response
-		 *
-		 * @param string $message  The message.
-		 * @param bool   $is_error If th message is an error (default = true)
-		 *
-		 * @return string $response
-		 */
-		public function generate_response( $message, $is_error = true ): string {
-
-			if ( $is_error ) {
-				return "<div class='error'>{$message}</div>";
-			}
-
-			return "<div class='success'>{$message}</div>";
-
-		}
-
 		public function get_post_args(): array {
-			$post_args = [];
-			$textareas = ['sender_message'];
-			$ints      = ['is_human', 'submitted'];
-			$emails    = ['sender_email'];
+			$post_args = array();
+			$textareas = array( 'sender_message' );
+			$ints      = array( 'submitted' );
+			$emails    = array( 'sender_email' );
 
-			foreach($_POST as $k => $v) {
-				$v = trim( $v );	//so we are sure it is whitespace free at both ends.
+			foreach ( $_POST as $k => $v ) {
+				$v = trim( $v );	// So we are sure it is whitespace free at both ends.
 
 				if ( in_array( $k, $ints ) ) {
 					$v = filter_var( $v, FILTER_VALIDATE_INT );
 				} elseif ( in_array( $k, $emails ) ) {
 					$v = filter_var( $v, FILTER_VALIDATE_EMAIL );
 				} else {
-					//preserve newline for textarea answers.
+					// Preserve newline for textarea answers.
 					if ( in_array( $k, $textareas ) ) {
 						$v = str_replace( "\n", "[NEWLINE]", $v );
 					}
-					//sanitise string.
+					// Sanitise string.
 					$v = filter_var( $v, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
-					//now replace the placeholder with the original newline.
+					// Now replace the placeholder with the original newline.
 					if ( in_array( $k, $textareas ) ) {
 						$v = str_replace( "[NEWLINE]", "\n", $v );
 					}
@@ -135,27 +126,23 @@ if ( ! class_exists( 'Contact' ) ) {
 
 			// Validate nonce
 			if ( false === wp_verify_nonce( $post_input['weop-contact-form-nonce'], 'weop-contact-form' ) ) {
-				return $this->generate_response( self::NONCE_INVALID);
+				return self::NONCE_INVALID;
 			}
-			
+
 			if ( '/contact-us/' !== $post_input['_wp_http_referer'] ) {
-				return $this->generate_response( self::NONCE_INVALID);
+				return self::NONCE_INVALID;
 			}
 
-			if ( false === $post_input['is_human'] ) {
-				return $this->generate_response( self::MISSING_CONTACT );
-			}
-
-			if ( 2 !== $post_input['is_human'] ) {
-				return $this->generate_response( self::NOT_HUMAN );
+			if ( $_SESSION['captcha_text'] !== strtoupper( $post_input['is_human'] ) ) {
+				return self::NOT_HUMAN;
 			}
 
 			if ( false === $post_input['sender_email'] ) {
-				return $this->generate_response( self::EMAIL_INVALID );
+				return self::EMAIL_INVALID;
 			}
 
 			if ( empty( $post_input['sender_name'] ) || empty( $post_input['sender_message'] ) ) {
-				return $this->generate_response( self::MISSING_CONTACT );
+				return self::MISSING_CONTACT;
 			}
 
 			// Input valid send email
@@ -164,10 +151,10 @@ if ( ! class_exists( 'Contact' ) ) {
 			$headers = "From: {$post_input['sender_email']}\r\nReply-To: {$post_input['sender_email']}\r\n";
 
 			if ( ! wp_mail( $to, $subject, strip_tags( $post_input['sender_message'] ), $headers ) ) {
-				return $this->generate_response( self::MESSAGE_UNSENT );
+				return self::MESSAGE_UNSENT;
 			}
 
-			return $this->generate_response( self::MESSAGE_SENT, false );
+			return self::MESSAGE_SENT;
 		}
 
 	}

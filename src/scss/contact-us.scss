@@ -1,13 +1,17 @@
 :root {
-	--color-contact-error: #f00;
-	--color-contact-success: #0f0;
+	--color-contact-error: #c80000;
+	--color-contact-success: #237723;
+	--input-width: 70%;
+	--input-font-size: 1.25rem;
 }
 
 .error,
 .success {
-	padding: 5px 9px;
-	border-radius: 3px;
-	border: 1px solid transparent;
+	width: var(--input-width);
+	padding: .5em 1em;
+	border-radius: 10px;
+	border: 5px solid transparent;
+	font-size: var(--input-font-size);
 	font-weight: bold;
 	margin: 1em 0;
 }
@@ -39,14 +43,16 @@ label + textarea {
 }
 
 input:not([type=submit]) {
-	width: 60ch;
+	font-size: var(--input-font-size);
+	width: var(--input-width);
+	padding: .5em 1em;
 }
 
 input[type=submit] {
 	display: block;
 	padding: .75em 1.5em;
 	border-radius: .3em;
-	font-size: 1rem;
+	font-size: var(--input-font-size);
 	color: black;
 	background: white;
 	transition: all .25s ease-in-out;
@@ -66,6 +72,28 @@ input[type=submit] {
 }
 
 textarea {
-	width: 60ch;
+	font-size: var(--input-font-size);
+	width: var(--input-width);
 	height: 10ch;
+	padding: .5em 1em;
+}
+
+.captcha-div {
+	display: flex;
+	gap: 1em;
+	align-items: center;
+
+	& span {
+		font-size: 2.5rem;
+		line-height: .5;
+		color: #aaa;
+		cursor: pointer;
+		transition: all .5s ease-in-out;
+		transform-origin: center right;
+
+		&:hover {
+			color: blue;
+			transform: rotate(-360deg);
+		}
+	}
 }
