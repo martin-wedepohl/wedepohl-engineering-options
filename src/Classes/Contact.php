@@ -25,7 +25,6 @@ if ( ! class_exists( 'Contact' ) ) {
 	 */
 	class Contact {
 
-
 		const NOT_HUMAN       = '<div class="error">Human verification failed.</div>';
 		const MISSING_CONTACT = '<div class="error">Please supply all information.</div>';
 		const EMAIL_INVALID   = '<div class="error">Email Address Invalid.</div>';
@@ -50,22 +49,31 @@ if ( ! class_exists( 'Contact' ) ) {
 			$this->main_plugin = $plugin;
 		}
 
+		/**
+		 * Display the contact us form.
+		 */
 		public function display_form() {
+
+			// Get the post arguments.
 			$post_input = $this->get_post_args();
 
 			$success = false;
+			// New contact form.
 			if ( ! isset( $post_input['submitted'] ) ) {
 				$response = '';
 			} else {
+				// Send the email.
 				$response = $this->send_email( $post_input );
 				if ( self::MESSAGE_SENT === $response ) {
 					$success = true;
 				}
 			}
+			// Blank fields if it is a success.
 			$name    = $success ? '' : isset( $post_input['sender_name'] ) ? $post_input['sender_name'] : '';
 			$email   = $success ? '' : isset( $post_input['sender_email'] ) ? $post_input['sender_email'] : '';
 			$message = $success ? '' : isset( $post_input['sender_message'] ) ? $post_input['sender_message'] : '';
 
+			$captcha_file = plugin_dir_url( __DIR__ ) . 'utilities/captcha.php';
 			?>
 <div id="contact-us-form">
 	<?php echo $response; ?>
@@ -78,7 +86,7 @@ if ( ! class_exists( 'Contact' ) ) {
 		<textarea type="text" id="message" name="sender_message" required><?php echo esc_textarea($message); ?></textarea>
 		<div class="captcha-div">
 			<img src="<?php echo plugin_dir_url( __DIR__ ); ?>utilities/captcha.php" alt="CAPTCHA" class="captcha-image">
-			<span title="Refresh Captcha" id="captcha-refresh" data-file="<?php echo plugin_dir_url( __DIR__ ); ?>utilities/captcha.php" class="content-icon dashicons dashicons-image-rotate"></span>
+			<span title="Refresh Captcha" id="captcha-refresh" data-file="<?php echo esc_url( $captcha_file ); ?>" class="content-icon dashicons dashicons-image-rotate"></span>
 		</div>
 		<label for="is_human" class="required">Enter characters show in image above:</label>
 		<input type="text" id="human_test" class="human_test" name="is_human" required>
@@ -90,6 +98,11 @@ if ( ! class_exists( 'Contact' ) ) {
 			<?php
 		}
 
+		/**
+		 * Get the post arguments and process them according to type.
+		 *
+		 * @return array Named array of post arguments.
+		 */
 		public function get_post_args(): array {
 			$post_args = array();
 			$textareas = array( 'sender_message' );
@@ -97,63 +110,77 @@ if ( ! class_exists( 'Contact' ) ) {
 			$emails    = array( 'sender_email' );
 
 			foreach ( $_POST as $k => $v ) {
-				$v = trim( $v );	// So we are sure it is whitespace free at both ends.
+				// So we are sure it is whitespace free at both ends.
+				$v = trim( $v );
 
-				if ( in_array( $k, $ints ) ) {
+				if ( in_array( $k, $ints, true ) ) {
 					$v = filter_var( $v, FILTER_VALIDATE_INT );
-				} elseif ( in_array( $k, $emails ) ) {
+				} elseif ( in_array( $k, $emails, true ) ) {
 					$v = filter_var( $v, FILTER_VALIDATE_EMAIL );
 				} else {
 					// Preserve newline for textarea answers.
-					if ( in_array( $k, $textareas ) ) {
-						$v = str_replace( "\n", "[NEWLINE]", $v );
+					if ( in_array( $k, $textareas, true ) ) {
+						$v = str_replace( "\n", '[NEWLINE]', $v );
 					}
 					// Sanitise string.
 					$v = filter_var( $v, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK );
 					// Now replace the placeholder with the original newline.
-					if ( in_array( $k, $textareas ) ) {
-						$v = str_replace( "[NEWLINE]", "\n", $v );
+					if ( in_array( $k, $textareas, true ) ) {
+						$v = str_replace( '[NEWLINE]', "\n", $v );
 					}
 				}
-				$post_args[$k] = $v;
+				$post_args[ $k ] = $v;
 			}
 
 			return $post_args;
 
 		}
 
-		public function send_email( $post_input ): string {
+		/**
+		 * Send the email after validating the input.
+		 *
+		 * @param array $post_input Name array of post input values.
+		 *
+		 * @return string The response
+		 */
+		public function send_email( array $post_input ): string {
 
-			// Validate nonce
+			// Validate nonce.
 			if ( false === wp_verify_nonce( $post_input['weop-contact-form-nonce'], 'weop-contact-form' ) ) {
 				return self::NONCE_INVALID;
 			}
 
+			// Validate coming from the contact-us page.
 			if ( '/contact-us/' !== $post_input['_wp_http_referer'] ) {
 				return self::NONCE_INVALID;
 			}
 
+			// Validate the captcha string.
 			if ( $_SESSION['captcha_text'] !== strtoupper( $post_input['is_human'] ) ) {
 				return self::NOT_HUMAN;
 			}
 
+			// Ensure that the email address is valid.
 			if ( false === $post_input['sender_email'] ) {
 				return self::EMAIL_INVALID;
 			}
 
+			// Need an name and a message.
 			if ( empty( $post_input['sender_name'] ) || empty( $post_input['sender_message'] ) ) {
 				return self::MISSING_CONTACT;
 			}
 
-			// Input valid send email
+			// Input valid send email.
 			$to      = get_option( 'admin_email' );
 			$subject = 'Someone sent a message from ' . get_bloginfo( 'name' );
 			$headers = "From: {$post_input['sender_email']}\r\nReply-To: {$post_input['sender_email']}\r\n";
 
 			if ( ! wp_mail( $to, $subject, strip_tags( $post_input['sender_message'] ), $headers ) ) {
+				// Error sending email.
 				return self::MESSAGE_UNSENT;
 			}
 
+			// Success.
 			return self::MESSAGE_SENT;
 		}
 
