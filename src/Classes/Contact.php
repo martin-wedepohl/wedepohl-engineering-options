@@ -47,6 +47,15 @@ if ( ! class_exists( 'Contact' ) ) {
 		 */
 		public function __construct( $plugin ) {
 			$this->main_plugin = $plugin;
+
+			\add_action(  'wp_enqueue_scripts', array( $this, 'load_dashicons_front_end' ) );
+		}
+
+		/**
+		 * Enqueue dashicons so they can be used on the front end.
+		 */
+		public function load_dashicons_front_end() {
+			\wp_enqueue_style( 'dashicons' );
 		}
 
 		/**
@@ -75,9 +84,9 @@ if ( ! class_exists( 'Contact' ) ) {
 
 			$captcha_file = plugin_dir_url( __DIR__ ) . 'utilities/captcha.php';
 			?>
-<div id="contact-us-form">
+<div class="contact-us-div">
 	<?php echo $response; ?>
-	<form id="contact-us-form" action="<?php echo esc_url( get_permalink() ); ?>" method="post">
+	<form class="contact-us-form" action="<?php echo esc_url( get_permalink() ); ?>" method="post">
 		<label for="sender_name" class="required">Name:</label>
 		<input type="text" id="name" name="sender_name" required value="<?php echo esc_attr($name); ?>">
 		<label for="sender_email" class="required">Email:</label>
@@ -173,7 +182,7 @@ if ( ! class_exists( 'Contact' ) ) {
 			// Input valid send email.
 			$to      = get_option( 'admin_email' );
 			$subject = 'Someone sent a message from ' . get_bloginfo( 'name' );
-			$headers = "From: {$post_input['sender_email']}\r\nReply-To: {$post_input['sender_email']}\r\n";
+			$headers = "From: {$post_input['sender_name']} <{$post_input['sender_email']}>\r\nReply-To: {$post_input['sender_email']}\r\n";
 
 			if ( ! wp_mail( $to, $subject, strip_tags( $post_input['sender_message'] ), $headers ) ) {
 				// Error sending email.
