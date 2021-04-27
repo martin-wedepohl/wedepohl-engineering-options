@@ -29,6 +29,7 @@ const distScriptPath = "js/";
 const styleFiles = srcStylePath + "/**/*.scss";
 const scriptFiles = srcScriptPath + "/**/*.js";
 const rootFiles = srcBase + "/**/*.php";
+const sitemapFiles = srcBase + "/includes/templates/sitemap.xsl";
 const utilities = srcBase + "/utilities/**/*";
 const licenseFile = "./license.txt";
 const vendor = srcBase + "/vendor";
@@ -45,6 +46,8 @@ const clean = () => del([distBase], {force: true});
 const copyRoot = () => {
     src(rootFiles)
 		.pipe(dest(distBase));
+    src(sitemapFiles)
+		.pipe(dest(distBase + "/includes/templates"));
 	src(utilities)
 		.pipe(dest(distBase + "/utilities"));
 	src(vendor)
@@ -132,6 +135,7 @@ const watchForChanges = () => {
     watch(styleFiles, css);
     watch(scriptFiles, js).on("change", browserSync.reload);
     watch(rootFiles, copyRoot).on("change", browserSync.reload);
+    watch(sitemapFiles, copyRoot).on("change", browserSync.reload);
 
     return console.log("Gulp is watching ....");
 }

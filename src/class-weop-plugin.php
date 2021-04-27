@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.29
+ * Version:     0.1.30
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -49,7 +49,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		const DEBUG_PLUGIN   = true;
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.29';
+		const PLUGIN_VERSION = '0.1.30';
 
 		/**
 		 * Plugin name
@@ -101,14 +101,80 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			// Start the session.
 			add_action( 'init', array( $this, 'session_start' ) );
 
+			// Disable WordPress sitemap.
+			add_filter( 'wp_sitemaps_enabled', '__return_false' );
+
+			// Set up for redirects
+			add_action( 'template_include', array( $this, 'template_contents' ) );			
+			add_filter( 'redirect_canonical', array( $this, 'prevent_slash_on_map_variable' ) );
+			add_action( 'init', array( $this, 'page_rewrites' ), 0 );
+
 		}
 
+		/**
+		 * Display the template content if the query map variable is set.
+		 *
+		 * map='sitemap' - Display the sitemap template.
+		 *
+		 * @param string $template The template string.
+		 *
+		 * @return string The template string if the map variable is NOT set or not valid.
+		 */
+		public function template_contents( $template ) {
+
+			$map = get_query_var( 'map' );
+
+			if ( ! empty( $map ) ) {
+				if ( 'sitemap' === $map ) {
+					$file_path  = plugin_dir_path( __FILE__ );
+					include $file_path . 'includes/templates/sitemap-xml-template.php';
+				}
+			}
+
+			return $template;
+
+		}
+
+		/**
+		 * Prevent a slash being added to the end of the url when the map variable is set.
+		 *
+		 * @param string $redirect The redirection URL.
+		 *
+		 * @return string The redirection URL or false if the map variable is set.
+		 */
+		public function prevent_slash_on_map_variable( $redirect ) {
+
+			if ( get_query_var( 'map' ) ) {
+				return false;
+			}
+
+			return $redirect;
+
+		}
+
+		/**
+		 * Rewrite the pages.
+		 *
+		 * sitemap.xml => index.php?map=sitemap
+		 *
+		 * IMPORTANT: Flush the rewrite rules if any changes are made to this function.
+		 */
+		public function page_rewrites() {
+
+			global $wp;
+			
+			$wp->add_query_var( 'map' );
+			add_rewrite_rule( 'sitemap\.xml$', 'index.php?map=sitemap', 'top' );
+
+		}
+
+		/**
+		 * Start the session so we can pass the captcha on the contact us page
+		 */
 		public function session_start() {
 
 			if ( ! session_id() ) {
-
 				session_start();
-
 			}
 
 		}
@@ -276,7 +342,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 					</script>
 					<?php
 				}
-				
+
 		}
 
 		/**
