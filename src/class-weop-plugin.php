@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.30
+ * Version:     0.1.31
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -49,7 +49,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		const DEBUG_PLUGIN   = true;
 		const PLUGIN_NAME    = 'weop';
 		const OPTIONS_NAME   = 'weop_options';
-		const PLUGIN_VERSION = '0.1.30';
+		const PLUGIN_VERSION = '0.1.31';
 
 		/**
 		 * Plugin name
@@ -68,6 +68,14 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		private $options_name;
 
 		/**
+		 * The title separators array
+		 *
+		 * @var array $separators Array of potential title separators
+		 * @access private
+		 */
+		private $separators;
+
+		/**
 		 * Class constructor
 		 */
 		public function __construct() {
@@ -75,6 +83,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			$this->plugin       = plugin_basename( __FILE__ );
 			$this->plugin_name  = self::PLUGIN_NAME;
 			$this->options_name = self::OPTIONS_NAME;
+			$this->separators   = array( '|', '•', '›', '»' );
 
 			// Register the plugin hooks.
 			register_activation_hook( __FILE__, array( $this, 'activation' ) );
@@ -162,7 +171,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		public function page_rewrites() {
 
 			global $wp;
-			
+
 			$wp->add_query_var( 'map' );
 			add_rewrite_rule( 'sitemap\.xml$', 'index.php?map=sitemap', 'top' );
 
@@ -333,15 +342,14 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		 */
 		public function add_analytics_in_header() {
 
-				$options        = get_option( $this->options_name );
-				$analytics_code = is_array( $options ) ? ( isset( $options['analytics'] ) ? $options['analytics'] : '' ) : '';
-				if ( '' !== $analytics_code ) {
-					?>
-					<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr( $analytics_code ); ?>"></script>
-						<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag("js", new Date());gtag("config","<?php echo esc_attr( $analytics_code ); ?>");
-					</script>
-					<?php
-				}
+			$options        = get_option( $this->options_name );
+			$analytics_code = is_array( $options ) ? ( isset( $options['analytics'] ) ? $options['analytics'] : '' ) : '';
+			if ( '' !== $analytics_code ) {
+			?>
+<script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr( $analytics_code ); ?>"></script>
+<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag("js", new Date());gtag("config","<?php echo esc_attr( $analytics_code ); ?>");</script>
+			<?php
+			}
 
 		}
 
@@ -351,17 +359,17 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 		public function display_settings() {
 			?>
 
-			<div class="wrap">
-			<?php settings_errors(); ?>
-				<h1><?php esc_html_e( 'Wedepohl Engineering Options - Version: ' . self::PLUGIN_VERSION, 'weop' ); ?></h1>
-				<form method="post" action="options.php">
-					<?php
-					settings_fields( $this->options_name );
-					do_settings_sections( $this->plugin_name );
-					submit_button();
-					?>
-				</form>
-			</div>
+<div class="wrap">
+<?php settings_errors(); ?>
+	<h1><?php esc_html_e( 'Wedepohl Engineering Options - Version: ' . self::PLUGIN_VERSION, 'weop' ); ?></h1>
+	<form method="post" action="options.php">
+		<?php
+		settings_fields( $this->options_name );
+		do_settings_sections( $this->plugin_name );
+		submit_button();
+		?>
+	</form>
+</div>
 
 			<?php
 		}
@@ -463,16 +471,28 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			$options = shortcode_atts(
 				array(
-					'analytics'     => '',
-					'comments'      => '',
-					'disable_fs'    => '',
-					'menu_position' => 4,                        // Default in between Dashboard and Posts.
-					'menu_icon'     => 'dashicons-admin-generic', // Default gear.
+					'analytics'       => '',
+					'comments'        => '',
+					'disable_fs'      => '',
+					'menu_position'   => 4,                         // Default in between Dashboard and Posts.
+					'menu_icon'       => 'dashicons-admin-generic', // Default gear.
+					'title_separator' => '',                        // Default pipe.
 				),
 				$options
 			);
 
 			return $options;
+
+		}
+
+		/**
+		 * Get the separators array
+		 *
+		 * @return array
+		 */
+		public function get_separators() {
+
+			return $this->separators;
 
 		}
 
@@ -497,7 +517,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			// Create menu position options array.
 			$select_options = array();
 			for ( $i = 0; $i <= 200; $i++ ) {
-				$select_options[$i] = $i;
+				$select_options[ $i ] = $i;
 			}
 			// Fill in WordPress predefined menu positions.
 			$select_options[2]  = '2 - Dashboard';
@@ -718,6 +738,22 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 				)
 			);
 
+			$separator = isset( $options['title_separator'] ) ? $options['title_separator'] : '';
+			add_settings_field(
+				'title_separator',
+				__( 'Pick the title separator:', 'weop' ),
+				array( $settings, 'display_select_field' ),
+				$this->plugin_name,
+				'options_section',
+				array(
+					'classes'       => 'regular-text',
+					'options'       => $this->separators,
+					'value'         => $separator,
+					'name'          => "{$this->options_name}[title_separator]",
+					'id'            => "{$this->options_name}[title_separator]",
+				)
+			);
+
 			add_settings_field(
 				'analytics',
 				__( 'Google Analytics Code:', 'weop' ),
@@ -866,6 +902,7 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 	new Classes\Comments( $weop );
 	$weop_contact = new Classes\Contact( $weop );
 	new Classes\DisableFS( $weop );
+	new Classes\Seo( $weop );
 	new Classes\Activities();
 	new Classes\Education();
 	new Classes\Jobs();

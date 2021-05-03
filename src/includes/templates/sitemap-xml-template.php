@@ -3,13 +3,11 @@
 /**
  * Get all the pages in the website to compile a sitemap.xml
  */
-$sitemap    = \get_page_by_path( 'sitemap-xml' );
-$sitemap_id = $sitemap->ID;
-$file_path  = plugin_dir_url( __FILE__ );
+
+ $file_path  = plugin_dir_url( __FILE__ );
 $args       = array(
 	'sort_order'  => 'DESC',
 	'sort_column' => 'post_modified',
-	'exclude'     => array( $sitemap_id ),
 );
 $all_pages  = get_pages( $args );
 
