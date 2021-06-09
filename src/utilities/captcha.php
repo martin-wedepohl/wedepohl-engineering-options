@@ -67,7 +67,7 @@ $white      = imagecolorallocate( $image, 255, 255, 255 );
 $textcolors = array( $gray, $white );
 
 // Create the fonts array.
-$fonts = array( dirname( __FILE__ ) . '\fonts\comic.ttf' );
+$fonts = array( dirname( __FILE__ ) . '/fonts/comic.ttf' );
 
 // Create the captcha string.
 $string_length   = 6;
