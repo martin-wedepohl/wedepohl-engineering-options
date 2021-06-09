@@ -160,7 +160,7 @@ if ( ! class_exists( 'Contact' ) ) {
 			}
 
 			// Validate coming from the contact-us page.
-			if ( '/contact-us/' !== $post_input['_wp_http_referer'] ) {
+			if ( '/' . basename( get_bloginfo( 'url' ) ) . '/contact-us/' !== $post_input['_wp_http_referer'] ) {
 				return self::NONCE_INVALID;
 			}
 
