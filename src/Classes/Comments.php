@@ -27,25 +27,19 @@ if ( ! class_exists( 'Comments' ) ) {
 		 * Class constructor.
 		 *
 		 * @global $wp_version The WordPress version
-		 *
-		 * @param function $plugin Callback to get the plugin options.
 		 */
-		public function __construct( $plugin ) {
+		public function __construct() {
 
 			global $wp_version;
 
-			$options = $plugin->get_options();
+			// Disable comments, pings and remove the comments from the admin menu.
+			add_action( 'admin_menu', array( $this, 'disable_comments_admin_menu' ) );
+			add_action( 'admin_init', array( $this, 'comments_admin_menu_redirect' ) );
+			add_action( 'admin_init', array( $this, 'disable_comments_dashboard' ) );
+			add_action( 'admin_init', array( $this, 'disable_comments_admin_bar' ) );
 
-			if  ( '1' === $options['comments'] ) {
-				// Disable comments, pings and remove the comments from the admin menu.
-				add_action( 'admin_menu', array( $this, 'disable_comments_admin_menu' ) );
-				add_action( 'admin_init', array( $this, 'comments_admin_menu_redirect' ) );
-				add_action( 'admin_init', array( $this, 'disable_comments_dashboard' ) );
-				add_action( 'admin_init', array( $this, 'disable_comments_admin_bar' ) );
-
-				if ( version_compare( $wp_version, '5.0', '>=' ) ) {
-					add_action( 'enqueue_block_editor_assets', array( $this, 'remove_block_discussions' ) );
-				}
+			if ( version_compare( $wp_version, '5.0', '>=' ) ) {
+				add_action( 'enqueue_block_editor_assets', array( $this, 'remove_block_discussions' ) );
 			}
 
 		}

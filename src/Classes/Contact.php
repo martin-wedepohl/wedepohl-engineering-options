@@ -33,22 +33,14 @@ if ( ! class_exists( 'Contact' ) ) {
 		const MESSAGE_SENT    = '<div class="success">Thanks! Your message has been sent.</div>';
 
 		/**
-		 * Get Options callback
-		 *
-		 * @var $main_plugin Callback function to get the plugin options
-		 * @access private
-		 */
-		private $main_plugin = null;
-
-		/**
 		 * Class constructor.
 		 *
 		 * @param function $plugin Callback to get the plugin options.
 		 */
-		public function __construct( $plugin ) {
-			$this->main_plugin = $plugin;
+		public function __construct() {
 
 			\add_action(  'wp_enqueue_scripts', array( $this, 'load_dashicons_front_end' ) );
+
 		}
 
 		/**

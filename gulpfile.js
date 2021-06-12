@@ -36,8 +36,9 @@ const vendor = srcBase + "/vendor";
 
 const indexJsFile = "/script.js";
 const adminJsFile = "/script-admin.js";
-const contactUsFile = "/contact-us.js";
-const jsFiles = [indexJsFile, adminJsFile, contactUsFile];
+const contactUsJsFile = "/contact-us.js";
+const seoJsFile = "/seo.js";
+const jsFiles = [indexJsFile, adminJsFile, contactUsJsFile, seoJsFile];
 
 // clean tasks
 const clean = () => del([distBase], {force: true});

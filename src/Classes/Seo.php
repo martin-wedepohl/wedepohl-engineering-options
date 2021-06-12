@@ -40,6 +40,14 @@ if ( ! class_exists( 'Seo' ) ) {
 		private $separators;
 
 		/**
+		 * Plugin parent
+		 *
+		 * @var WEOP_Plugin $plugin Parent object
+		 * @access private
+		 */
+		private $plugin;
+
+		/**
 		 * Class constructor.
 		 *
 		 * @global $wp_version The WordPress version
@@ -50,6 +58,10 @@ if ( ! class_exists( 'Seo' ) ) {
 
 			$this->options    = $plugin->get_options();
 			$this->separators = $plugin->get_separators();
+			$this->plugin     = $plugin;
+
+			// Setup enqueue actions.
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue' ) );
 
 			// Set up for SEO.
 			add_action( 'after_setup_theme', array( $this, 'allow_title_modification' ), 11 );
@@ -58,6 +70,49 @@ if ( ! class_exists( 'Seo' ) ) {
 			add_action( 'wp_head', array( $this, 'meta_description' ) );
 			add_action( 'load-post.php', array( $this, 'meta_box_setup' ) );
 			add_action( 'load-post-new.php', array( $this, 'meta_box_setup' ) );
+
+		}
+
+		/**
+		 * Enqueue scripts
+		 */
+		public function enqueue() {
+
+			$file      = \plugin_dir_path( __FILE__ ) . '../dist/css/seo.min.css';
+			$css       = \plugin_dir_url( __FILE__ )  . '../dist/css/seo.min.css';
+			$filemtime = filemtime( $file );
+			if ( '' !== $css ) {
+				$filemtime = filemtime( $file );
+				\wp_enqueue_style(
+					'weop_seo_style',
+					$css,
+					array(),
+					$this->plugin->isDebug() ? $filemtime : $this->plugin->version(),
+					'all'
+				);
+			}
+
+			$file      = \plugin_dir_path( __FILE__ ) . '../dist/js/seo.min.js';
+			$js        = \plugin_dir_url( __FILE__ )  . '../dist/js/seo.min.js';
+			\wp_enqueue_script(
+				'weop_seo_script',
+				$js,
+				array(),
+				$this->plugin->isDebug() ? $filemtime : $this->plugin->version(),
+				true
+			);
+
+			$separator = $this->get_separator();
+			$site      = $this->get_site();
+
+			\wp_localize_script(
+				'weop_seo_script',
+				'seo_ajax_object', 
+				array(
+					'separator' => $separator,
+					'site'      => $site,
+				) 
+			);
 
 		}
 
@@ -85,6 +140,26 @@ if ( ! class_exists( 'Seo' ) ) {
 
 			return $this->separators[ $this->options['title_separator'] ];
 
+		}
+
+		public function get_separator() {
+			return $this->separators[ $this->options['title_separator'] ];
+		}
+
+		public function get_site() {
+			global $post;
+
+			if ( $post->ID === (int) get_option( 'page_on_front' ) ) {
+				$site = get_bloginfo( 'description' );
+			} else {
+				$site = get_bloginfo( 'name' );
+			}
+
+			return $site;
+		}
+
+		public function get_tagline() {
+			return get_bloginfo( 'description' );
 		}
 
 		/**
@@ -133,15 +208,12 @@ if ( ! class_exists( 'Seo' ) ) {
 			$description = esc_attr( get_post_meta( $post->ID, 'weop_seo_description', true ) );
 
 			if ( empty( $description ) ) {
-				if ( is_home() || is_front_page() ) {
-					$description = get_bloginfo( 'description' );
-				} else {
-					$description  = strip_tags( $post->post_content );
-					$description .= strip_shortcodes( $description );			
-				}
+				$description = wp_strip_all_tags( $post->post_content );
+				$description = strip_shortcodes( $description );			
+				$description = preg_replace( '!\s+!', ' ', $description );
+				$description = preg_replace( '!"!', '', $description );
+				$description = mb_substr( $description, 0, strlen( $description ), 'utf8' );
 			}
-			$description = preg_replace( '!\s+!', ' ', $description );
-			$description = mb_substr( $description, 0, 158, 'utf8' );
 
 			echo "<meta name=\"description\" content=\"${description}\" />"; 
 
@@ -238,14 +310,40 @@ if ( ! class_exists( 'Seo' ) ) {
 		 * @param array $post The post where the callback is found.
 		 */
 		public function meta_box( $post ) {
+			global $post;
+
+			$title       = get_post_meta( $post->ID, 'weop_seo_title', true );
+			$description = get_post_meta( $post->ID, 'weop_seo_description', true );
+
+			if ( empty( $title ) ) {
+				if ( $post->ID === (int) get_option( 'page_on_front' ) ) {
+					$title = get_bloginfo( 'name' );
+				} else {
+					$title = get_the_title( $post->ID );
+				}	
+			}
+
+			if ( empty( $description ) ) {
+				$description = apply_filters( 'the_content', $post->post_content );
+				$description = wp_strip_all_tags( $description );
+				$description = strip_shortcodes( $description );			
+				$description = preg_replace( '!\s+!', ' ', $description );
+				$description = preg_replace( '!"!', '', $description );
+				$description = mb_substr( $description, 0, strlen( $description ), 'utf8' );
+			}
 
 			wp_nonce_field( basename( __FILE__ ), 'weop_seo_nonce' );
 			?>
 <p>
 	<label for="weop-seo-title"><?php _e( 'SEO title for the page', 'weop' ); ?></label>
-	<input class="widefat" type="text" name="weop-seo-title" id="weop-seo-title" value="<?php echo esc_attr( get_post_meta( $post->ID, 'weop_seo_title', true ) ); ?>" size="30" />
+	<div class="seo-title-div">
+		<input class="seo-title" type="text" name="weop-seo-title" id="weop-seo-title" value="<?php echo esc_attr( $title ); ?>" size="30" />
+		<span class="seo-suffix"></span>
+	</div>
+	<span class="seo-title-hint"><span class="chars">0</span> chars; <span class="pixels">0</span> px</span>
 	<label for="weop-seo-description"><?php _e( 'SEO description for the page', 'weop' ); ?></label>
-	<textarea class="widefat" name="weop-seo-description" id="weop-seo-description"><?php echo esc_attr( get_post_meta( $post->ID, 'weop_seo_description', true ) ); ?></textarea>
+	<textarea class="widefat seo-description" name="weop-seo-description" id="weop-seo-description"><?php echo esc_attr( $description ); ?></textarea>
+	<span class="seo-description-hint"><span class="chars">0</span> chars; <span class="pixels">0</span> px; <span class="mobile">Mobile Description</span></span>
 </p>
 			<?php
 		}

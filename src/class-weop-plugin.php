@@ -3,7 +3,7 @@
  * Plugin Name: Wedepohl Engineering Options Plugin
  * Plugin URI:  https://github.com/martin-wedepohl/wedepohl-engineering-options/
  * Description: Plugin for SpyGlass HiTek or Wedepohl Engineering Websites
- * Version:     0.1.33
+ * Version:     0.1.34
  * Author:      Martin Wedepohl <martin@wedepohlengineering.com>
  * Author URI:  http://wedepohlengineering.com/
  * License:     GPL3 or higher
@@ -204,6 +204,24 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			flush_rewrite_rules();
 
+		}
+
+		/**
+		 * Return if we are debugging the plugin
+		 *
+		 * @return bool If debugging plugin
+		 */
+		public function isDebug() : bool {
+			return self::DEBUG_PLUGIN;
+		}
+
+		/**
+		 * Return plugin version
+		 *
+		 * @return string Plugin Version
+		 */
+		public function version() : string {
+			return self::PLUGIN_VERSION;
 		}
 
 		/**
@@ -471,12 +489,13 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 			$options = shortcode_atts(
 				array(
-					'analytics'       => '',
-					'comments'        => '',
-					'disable_fs'      => '',
-					'menu_position'   => 4,                         // Default in between Dashboard and Posts.
-					'menu_icon'       => 'dashicons-admin-generic', // Default gear.
-					'title_separator' => '',                        // Default pipe.
+					'analytics'        => '',
+					'disable_comments' => '',
+					'disable_fs'       => '',
+					'disable_seo'      => '',
+					'menu_position'    => 4,                         // Default in between Dashboard and Posts.
+					'menu_icon'        => 'dashicons-admin-generic', // Default gear.
+					'title_separator'  => '',                        // Default pipe.
 				),
 				$options
 			);
@@ -771,16 +790,30 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 			);
 
 			add_settings_field(
-				'comments',
+				'disable_seo',
+				__( 'Disable SEO:', 'weop' ),
+				array( $settings, 'display_checkbox_field' ),
+				$this->plugin_name,
+				'options_section',
+				array(
+					'label-text' => __( 'Disable SEO', 'weop' ),
+					'value'      => $options['disable_seo'],
+					'name'       => "{$this->options_name}[disable_seo]",
+					'id'         => "{$this->options_name}[disable_seo]",
+				)
+			);
+
+			add_settings_field(
+				'disable_comments',
 				__( 'Disable Comments:', 'weop' ),
 				array( $settings, 'display_checkbox_field' ),
 				$this->plugin_name,
 				'options_section',
 				array(
 					'label-text' => __( 'Disable comments on website', 'weop' ),
-					'value'      => $options['comments'],
-					'name'       => "{$this->options_name}[comments]",
-					'id'         => "{$this->options_name}[comments]",
+					'value'      => $options['disable_comments'],
+					'name'       => "{$this->options_name}[disable_comments]",
+					'id'         => "{$this->options_name}[disable_comments]",
 				)
 			);
 
@@ -898,11 +931,22 @@ if ( ! class_exists( 'WEOP_Plugin' ) ) {
 
 	}
 
-	$weop = new WEOP_Plugin();
-	new Classes\Comments( $weop );
-	$weop_contact = new Classes\Contact( $weop );
-	new Classes\DisableFS( $weop );
-	new Classes\Seo( $weop );
+	$weop    = new WEOP_Plugin();
+	$options = $weop->get_options();
+
+	if ( '1' === $options['disable_comments'] ) {
+		new Classes\Comments();
+	}
+
+	if ( '1' === $options['disable_fs'] ) {
+		new Classes\DisableFS();
+	}
+
+	if ( '1' !== $options['disable_seo'] ) {
+		new Classes\Seo( $weop );
+	}
+
+	new Classes\Contact();
 	new Classes\Activities();
 	new Classes\Education();
 	new Classes\Jobs();

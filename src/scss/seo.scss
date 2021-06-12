@@ -1,0 +1,37 @@
+.seo-title-div {
+	display: flex;
+	align-items: center;
+}
+
+.seo-title {
+	flex-grow: 1;
+	margin-right: 1em;
+}
+
+.seo-title-hint,
+.seo-description-hint {
+	font-size: .85em;
+	display: block;
+	text-align: right;
+}
+
+.chars,
+.pixels,
+.mobile {
+	color: green;
+}
+
+.chars.error,
+.pixels.error,
+.mobile.mobile-error {
+	font-weight: bold;
+	color: red;
+}
+
+.mobile::after {
+	content: ' OK';
+}
+
+.mobile.mobile-error::after {
+	content: ' WARNING';
+}
