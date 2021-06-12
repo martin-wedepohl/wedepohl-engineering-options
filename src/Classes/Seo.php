@@ -71,6 +71,9 @@ if ( ! class_exists( 'Seo' ) ) {
 			add_action( 'load-post.php', array( $this, 'meta_box_setup' ) );
 			add_action( 'load-post-new.php', array( $this, 'meta_box_setup' ) );
 
+			add_filter( 'manage_page_posts_columns', array( $this, 'table_head' ) );
+			add_action( 'manage_page_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
+
 		}
 
 		/**
@@ -380,6 +383,51 @@ if ( ! class_exists( 'Seo' ) ) {
 	<span class="seo-description-hint"><span class="chars">0</span> chars; <span class="pixels">0</span> px; <span class="mobile">Mobile Description</span></span>
 </p>
 			<?php
+		}
+
+		/**
+		 * Display the table headers for custom columns in our order.
+		 *
+		 * @param array $columns Array of headers.
+		 *
+		 * @return array Modified array of headers.
+		 */
+		public function table_head( $columns ) : array {
+			$newcols = array();
+			// Want the selection box and title (name for our custom post type) first.
+			$newcols['cb'] = $columns['cb'];
+			unset( $columns['cb'] );
+			$newcols['title'] = __( 'Title', 'weop' );
+			unset( $columns['title'] );
+			// Our custom meta data columns.
+			$newcols['seoTitle']       = __( 'SEO Title', 'weop' );
+			$newcols['seoDescription'] = __( 'SEO Description', 'weop' );
+			// Want date last.
+			unset( $columns['date'] );
+			// Add all other selected columns.
+			foreach ( $columns as $col => $title ) {
+				$newcols[ $col ] = $title;
+			}
+			// Add the date back.
+			$newcols['date'] = 'Date';
+			return $newcols;
+		}
+
+		/**
+		 * Display the meta data associated with a post on the administration table
+		 *
+		 * @param string $column_name The header of the column.
+		 * @param int    $post_id     The ID of the post being displayed.
+		 */
+		public function table_content( $column_name, $post_id ) {
+
+			if ( 'seoTitle' === $column_name ) {
+				$title = get_post_meta( $post_id, 'weop_seo_title', true );
+				echo esc_html( $title );
+			} elseif ( 'seoDescription' === $column_name ) {
+				$description = get_post_meta( $post_id, 'weop_seo_description', true );
+				echo esc_html( $description );
+			}
 		}
 
 	}
