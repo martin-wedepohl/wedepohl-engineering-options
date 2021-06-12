@@ -42,6 +42,8 @@ if ( ! class_exists( 'Comments' ) ) {
 				add_action( 'enqueue_block_editor_assets', array( $this, 'remove_block_discussions' ) );
 			}
 
+			add_filter( 'manage_page_posts_columns', array( $this, 'table_head' ) );
+
 		}
 
 		/**
@@ -102,6 +104,23 @@ if ( ! class_exists( 'Comments' ) ) {
 			$script = "wp.domReady( () => { const { removeEditorPanel } = wp.data.dispatch('core/edit-post'); removeEditorPanel( 'discussion-panel' ); } );";
 			wp_add_inline_script( 'wp-blocks', $script );
 
+		}
+
+		/**
+		 * Remove the comments count column.
+		 *
+		 * @param array $columns Array of headers.
+		 *
+		 * @return array Modified array of headers.
+		 */
+		public function table_head( $columns ) : array {
+			$newcols = array();
+			unset( $columns['comments'] );
+			// Add all other selected columns.
+			foreach ( $columns as $col => $title ) {
+				$newcols[ $col ] = $title;
+			}
+			return $newcols;
 		}
 
 	}
