@@ -132,7 +132,7 @@ if ( ! class_exists( 'Seo' ) ) {
 		 *
 		 * @return string The new separator.
 		 */
-		public function change_separator( $sep ) {
+		public function change_separator( string $sep ): string {
 
 			if ( '' === $this->options['title_separator'] ) {
 				return $sep;
@@ -142,24 +142,51 @@ if ( ! class_exists( 'Seo' ) ) {
 
 		}
 
-		public function get_separator() {
+		/**
+		 * Return the current title separator.
+		 *
+		 * @return string separator.
+		 */
+		public function get_separator(): string {
+
 			return $this->separators[ $this->options['title_separator'] ];
+
 		}
 
-		public function get_site() {
+		/**
+		 * Return the site which will be the tagline if on the front page
+		 * and the name of the site if on any other page.
+		 *
+		 * This works on the back end of the website.
+		 */
+		public function get_site(): string {
+
 			global $post;
 
+			// Back end check to ensure we are on a page
+			if ( empty ( $post_ID ) || 'page' !== $post_type ) {
+				return '';
+			}
+
 			if ( $post->ID === (int) get_option( 'page_on_front' ) ) {
-				$site = get_bloginfo( 'description' );
+				$site = $this->get_tagline();
 			} else {
 				$site = get_bloginfo( 'name' );
 			}
 
 			return $site;
+
 		}
 
-		public function get_tagline() {
+		/**
+		 * Return the current site tagline.
+		 *
+		 * @return string tagline
+		 */
+		public function get_tagline(): string {
+
 			return get_bloginfo( 'description' );
+
 		}
 
 		/**
@@ -170,7 +197,7 @@ if ( ! class_exists( 'Seo' ) ) {
 		 *
 		 * @return array The modified parts of the title.
 		 */
-		public function change_title( $title_parts ) {
+		public function change_title( array $title_parts ): array {
 
 			global $post;
 
@@ -195,9 +222,14 @@ if ( ! class_exists( 'Seo' ) ) {
 		}
 
 		/**
-		 * Create the meta description.
-		 * Limit 120 characters for mobile.
-		 * Limit 158 characters for desktop.
+		 * Echo the meta description.
+		 *
+		 * Google limits the following:
+		 *    Desktop 158 chars or 920 pixels
+		 *    Mobile  120 chars or 680 pixels
+		 *
+		 * If there is no SEO description the first 158 characters of the
+		 * content will be used as the description.
 		 *
 		 * @global array $post The current post to get the content
 		 */
@@ -208,11 +240,12 @@ if ( ! class_exists( 'Seo' ) ) {
 			$description = esc_attr( get_post_meta( $post->ID, 'weop_seo_description', true ) );
 
 			if ( empty( $description ) ) {
+				// Create a description from the content.
 				$description = wp_strip_all_tags( $post->post_content );
 				$description = strip_shortcodes( $description );			
 				$description = preg_replace( '!\s+!', ' ', $description );
 				$description = preg_replace( '!"!', '', $description );
-				$description = mb_substr( $description, 0, strlen( $description ), 'utf8' );
+				$description = mb_substr( $description, 0, 158, 'utf8' );
 			}
 
 			echo "<meta name=\"description\" content=\"${description}\" />"; 
@@ -256,8 +289,10 @@ if ( ! class_exists( 'Seo' ) ) {
 		 * Save the meta box information.
 		 *
 		 * @param int   $post_id The Post ID.
+		 *
+		 * @global array $post The post information.
 		 */
-		public function save_meta_box( $post_id ) {
+		public function save_meta_box( int $post_id ) {
 
 			global $post;
 
@@ -307,10 +342,9 @@ if ( ! class_exists( 'Seo' ) ) {
 		/**
 		 * SEO Meta Box callback.
 		 *
-		 * @param array $post The post where the callback is found.
+		 * @param object $post The post where the callback is found.
 		 */
-		public function meta_box( $post ) {
-			global $post;
+		public function meta_box( object $post ) {
 
 			$title       = get_post_meta( $post->ID, 'weop_seo_title', true );
 			$description = get_post_meta( $post->ID, 'weop_seo_description', true );

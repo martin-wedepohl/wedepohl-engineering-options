@@ -34,12 +34,10 @@ if ( ! class_exists( 'Contact' ) ) {
 
 		/**
 		 * Class constructor.
-		 *
-		 * @param function $plugin Callback to get the plugin options.
 		 */
 		public function __construct() {
 
-			\add_action(  'wp_enqueue_scripts', array( $this, 'load_dashicons_front_end' ) );
+			\add_action( 'wp_enqueue_scripts', array( $this, 'load_dashicons_front_end' ) );
 
 		}
 
@@ -47,7 +45,9 @@ if ( ! class_exists( 'Contact' ) ) {
 		 * Enqueue dashicons so they can be used on the front end.
 		 */
 		public function load_dashicons_front_end() {
+
 			\wp_enqueue_style( 'dashicons' );
+
 		}
 
 		/**
@@ -105,6 +105,7 @@ if ( ! class_exists( 'Contact' ) ) {
 		 * @return array Named array of post arguments.
 		 */
 		public function get_post_args(): array {
+
 			$post_args = array();
 			$textareas = array( 'sender_message' );
 			$ints      = array( 'submitted' );
