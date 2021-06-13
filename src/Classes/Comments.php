@@ -43,6 +43,7 @@ if ( ! class_exists( 'Comments' ) ) {
 			}
 
 			add_filter( 'manage_page_posts_columns', array( $this, 'table_head' ) );
+			add_filter( 'manage_post_posts_columns', array( $this, 'table_head' ) );
 
 		}
 

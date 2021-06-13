@@ -73,6 +73,8 @@ if ( ! class_exists( 'Seo' ) ) {
 
 			add_filter( 'manage_page_posts_columns', array( $this, 'table_head' ) );
 			add_action( 'manage_page_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
+			add_filter( 'manage_post_posts_columns', array( $this, 'table_head' ) );
+			add_action( 'manage_post_posts_custom_column', array( $this, 'table_content' ), 10, 2 );
 
 		}
 
@@ -167,7 +169,7 @@ if ( ! class_exists( 'Seo' ) ) {
 			global $post;
 
 			// Back end check to ensure we are on a page
-			if ( empty ( $post_ID ) || 'page' !== $post_type ) {
+			if ( empty( $post->ID ) || ( 'page' !== $post->post_type && 'post' !== $post->post_type ) ) {
 				return '';
 			}
 
